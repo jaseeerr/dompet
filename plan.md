@@ -317,7 +317,7 @@ pet.destroy();
 
 **Acceptance:** CI passes, performance measurements are recorded, critical regressions are resolved and known limitations are documented.
 
-Local performance and regression checks passed. Hosted CI is pending. [Reference measurements](benchmarks/RESULTS.md)
+Local performance and regression checks passed. Hosted release CI passed. [Reference measurements](benchmarks/RESULTS.md)
 
 ### Phase 9 — Demo, documentation and release candidate
 
@@ -343,7 +343,7 @@ Local performance and regression checks passed. Hosted CI is pending. [Reference
 
 **Acceptance:** The package works outside its own repository, documentation matches implementation, and release candidate has no critical known defects.
 
-The private 0.1.0-rc.1 tarball and consumer verification are recorded in [phase 9](phases/phase9.md). All CI commands passed locally. Hosted CI remains pending.
+The private 0.1.0-rc.1 tarball and consumer verification are recorded in [phase 9](phases/phase9.md). All CI commands passed locally. Hosted release CI passed.
 
 ### Phase 10 — Private GitHub package distribution
 
@@ -351,15 +351,15 @@ The private 0.1.0-rc.1 tarball and consumer verification are recorded in [phase 
 
 **Develop and release**
 
-- [ ] Create a private repository, e.g. `jaseeerr/dompet`, and push the complete source, tests and documentation.
-- [ ] Configure access for authorized collaborators only; use branch protection and required CI checks where available.
-- [ ] Set package name `dompet`, version `0.1.0`, `private: true`, `type: module`, and appropriate `exports`, `types`, `files` and `sideEffects` metadata.
-- [ ] Keep the release build reproducible. For MVP Git installs, generate and commit the `dist/` artifacts at release time so consumers do not require build-time dev dependencies or install lifecycle scripts. Ensure those artifacts are tracked despite ignore rules.
-- [ ] Make CI verify that the committed release artifacts match a clean build; include runtime assets in `dist/`.
-- [ ] Verify no secrets, credentials, local environment files or unlicensed assets are committed. Store any CI credentials as secrets, not source files.
-- [ ] Run final CI and package smoke tests; bump version and update changelog.
-- [ ] Tag the verified release `v0.1.0` and optionally create a private GitHub Release with notes and the packed tarball.
-- [ ] Document authenticated SSH Git installation and pinned tag/commit usage. For CI consumers, use a scoped read-only deploy key or approved machine credential; never embed tokens in package.json, lockfiles or URLs.
+- [x] Create a private repository, e.g. `jaseeerr/dompet`, and push the complete source, tests and documentation.
+- [x] Configure access for authorized collaborators only; use branch protection and required CI checks where available.
+- [x] Set package name `dompet`, version `0.1.0`, `private: true`, `type: module`, and appropriate `exports`, `types`, `files` and `sideEffects` metadata.
+- [x] Keep the release build reproducible. For MVP Git installs, generate and commit the `dist/` artifacts at release time so consumers do not require build-time dev dependencies or install lifecycle scripts. Ensure those artifacts are tracked despite ignore rules.
+- [x] Make CI verify that the committed release artifacts match a clean build; include runtime assets in `dist/`.
+- [x] Verify no secrets, credentials, local environment files or unlicensed assets are committed. Store any CI credentials as secrets, not source files.
+- [x] Run final CI and package smoke tests; bump version and update changelog.
+- [x] Tag the verified release `v0.1.0` and optionally create a private GitHub Release with notes and the packed tarball.
+- [x] Document authenticated SSH Git installation and pinned tag/commit usage. For CI consumers, use a scoped read-only deploy key or approved machine credential; never embed tokens in package.json, lockfiles or URLs.
 
 **Example package metadata (adjust actual output paths)**
 
@@ -406,15 +406,17 @@ For immutable dependency pinning, use the verified commit SHA instead of a tag. 
 
 ## 4. Release definition of done
 
-- [ ] All phase acceptance criteria are met or exceptions explicitly documented.
-- [ ] Automated unit, integration and browser tests pass in CI.
-- [ ] The cat autonomously walks, jumps, falls, rests and navigates visible eligible elements.
-- [ ] Dynamic layout changes and supported scrolling contexts work reliably.
-- [ ] Host inputs, accessibility and performance are not materially disrupted.
-- [ ] Lifecycle cleanup is verified; assets and licensing are documented.
-- [ ] README examples work in clean consumer projects.
-- [ ] Private GitHub repository and versioned tag exist; authorized Git installation is verified.
-- [ ] No runtime telemetry, unnecessary external requests or public package publication.
+- [x] All phase acceptance criteria are met or exceptions explicitly documented.
+- [x] Automated unit, integration and browser tests pass in CI.
+- [x] The cat autonomously walks, jumps, falls, rests and navigates visible eligible elements.
+- [x] Dynamic layout changes and supported scrolling contexts work reliably.
+- [x] Host inputs, accessibility and performance are not materially disrupted.
+- [x] Lifecycle cleanup is verified; assets and licensing are documented.
+- [x] README examples work in clean consumer projects.
+- [x] Private GitHub repository and versioned tag exist; authorized Git installation is verified.
+- [x] No runtime telemetry, unnecessary external requests or public package publication.
+
+See the [release record](phases/phase10.md) for verification and the private branch-protection plan limitation.
 
 ## 5. Post-MVP backlog
 

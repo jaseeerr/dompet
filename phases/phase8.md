@@ -42,4 +42,4 @@ Begin after the acceptance checks in [phase 7](phase7.md) pass.
 
 **Acceptance:** CI passes, performance measurements are recorded, critical regressions are resolved and known limitations are documented.
 
-Local verification passed with 16 unit tests, 50 browser tests, typecheck, lint, production build and a runtime dependency-tree check. See the [reference measurements](../benchmarks/RESULTS.md). Hosted GitHub Actions verification is pending upload of the workflow and implementation.
+Local verification passed with 16 unit tests, 50 browser tests, typecheck, lint, production build and a runtime dependency-tree check. See the [reference measurements](../benchmarks/RESULTS.md). The [hosted release checks](https://github.com/jaseeerr/dompet/actions/runs/45407911318) passed for the final release.
