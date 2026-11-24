@@ -7,7 +7,34 @@ const bundle = await readFile(
   new URL("../dist/index.js", import.meta.url),
   "utf8",
 );
-const browser = await chromium.launch();
+async function serve(page) {
+  await page.route("http://dompet.test/**", async (route) => {
+    const path = new URL(route.request().url()).pathname;
+    if (path === "/")
+      return route.fulfill({ contentType: "text/html", body: "<body></body>" });
+    const body = await readFile(new URL("../dist" + path, import.meta.url));
+    return route.fulfill({
+      body,
+      contentType: path.endsWith(".js")
+        ? "text/javascript"
+        : "application/octet-stream",
+    });
+  });
+  await page.goto("http://dompet.test/");
+}
+const useMetal = process.env.DOMPET_BENCH_GPU === "metal";
+const browser = await chromium.launch(
+  useMetal
+    ? {
+        channel: "chromium",
+        args: [
+          "--enable-gpu",
+          "--use-angle=metal",
+          "--disable-software-rasterizer",
+        ],
+      }
+    : {},
+);
 try {
   console.log(
     JSON.stringify({
@@ -17,27 +44,30 @@ try {
       gzipBytes: gzipSync(bundle).length,
     }),
   );
-  for (const [count, rate] of [
+  for (const [count, rate, mobile = false, mode = "auto"] of [
     [100, 1],
     [1000, 1],
     [5000, 1],
     [1000, 4],
+    [1000, 1, true],
+    [1000, 1, false, "sprite"],
   ]) {
     const page = await browser.newPage({
-      viewport: { width: 1280, height: 720 },
+      viewport: mobile
+        ? { width: 390, height: 844 }
+        : { width: 1280, height: 720 },
     });
+    await serve(page);
     const session = await page.context().newCDPSession(page);
     await session.send("Emulation.setCPUThrottlingRate", { rate });
     const result = await page.evaluate(
-      async ({ bundle, count }) => {
+      async ({ count, mode }) => {
         let seed = 42;
         Math.random = () => {
           seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
           return seed / 2 ** 32;
         };
-        const { DOMPet } = await import(
-          URL.createObjectURL(new Blob([bundle], { type: "text/javascript" }))
-        );
+        const { DOMPet } = await import("/index.js");
         document.body.innerHTML =
           '<style>#outer{height:620px;overflow:auto}#inner{height:850px;overflow:auto;display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.card{height:52px;background:tan}</style><main id="outer"><section id="inner"></section></main>';
         const inner = document.querySelector("#inner");
@@ -75,8 +105,65 @@ try {
         }
         const disabled = await workload();
         inner.scrollTop = 0;
-        const pet = new DOMPet();
+        const pet = new DOMPet({ renderer: mode });
+        const loadStart = performance.now();
         pet.start();
+        await pageReady();
+        const readyMs = Math.round(performance.now() - loadStart);
+        async function pageReady() {
+          while (
+            document.querySelector("[data-dompet]").dataset.renderer ===
+            "loading"
+          )
+            await frame();
+        }
+        const renderer =
+          document.querySelector("[data-dompet]").dataset.renderer;
+        let graphics;
+        if (renderer === "webgl") {
+          const gl = document
+            .querySelector("[data-dompet]")
+            .shadowRoot.querySelectorAll("canvas")[1]
+            .getContext("webgl2");
+          const info = gl.getExtension("WEBGL_debug_renderer_info");
+          const timer = gl.getExtension("EXT_disjoint_timer_query_webgl2");
+          const query = timer ? gl.createQuery() : null;
+          let calls = 0,
+            triangles = 0;
+          const original = gl.drawElements;
+          gl.drawElements = function (mode, count, ...rest) {
+            calls++;
+            if (mode === gl.TRIANGLES) triangles += count / 3;
+            return original.call(this, mode, count, ...rest);
+          };
+          if (query) gl.beginQuery(timer.TIME_ELAPSED_EXT, query);
+          await frame();
+          if (query) gl.endQuery(timer.TIME_ELAPSED_EXT);
+          gl.drawElements = original;
+          let gpuMs = null;
+          if (query) {
+            for (
+              let i = 0;
+              i < 30 && !gl.getQueryParameter(query, gl.QUERY_RESULT_AVAILABLE);
+              i++
+            )
+              await frame();
+            if (
+              gl.getQueryParameter(query, gl.QUERY_RESULT_AVAILABLE) &&
+              !gl.getParameter(timer.GPU_DISJOINT_EXT)
+            )
+              gpuMs = gl.getQueryParameter(query, gl.QUERY_RESULT) / 1e6;
+            gl.deleteQuery(query);
+          }
+          graphics = {
+            driver: info
+              ? gl.getParameter(info.UNMASKED_RENDERER_WEBGL)
+              : gl.getParameter(gl.RENDERER),
+            calls,
+            triangles,
+            gpuMs,
+          };
+        }
         const enabled = await workload();
         const times = [];
         for (let i = 0; i < 40; i++) {
@@ -87,7 +174,7 @@ try {
           times.push(performance.now() - t);
         }
         pet.destroy();
-        const debug = new DOMPet({ debug: true });
+        const debug = new DOMPet({ debug: true, renderer: mode });
         debug.start();
         const frames = [],
           physics = [],
@@ -106,6 +193,9 @@ try {
         const metrics = debug.debugMetrics;
         debug.destroy();
         return {
+          renderer,
+          readyMs,
+          graphics,
           disabled,
           enabled,
           refresh: stats(times),
@@ -120,19 +210,17 @@ try {
             : {}),
         };
       },
-      { bundle, count },
+      { count, mode },
     );
-    console.log(JSON.stringify({ nodes: count, rate, ...result }));
+    console.log(JSON.stringify({ nodes: count, rate, mobile, ...result }));
     await page.close();
   }
   const page = await browser.newPage();
-  await page.setContent("<!doctype html><html><body></body></html>");
+  await serve(page);
   const session = await page.context().newCDPSession(page);
-  await page.evaluate(async (bundle) => {
-    const { DOMPet } = await import(
-      URL.createObjectURL(new Blob([bundle], { type: "text/javascript" }))
-    );
-    window.makePet = () => new DOMPet({ debug: true });
+  await page.evaluate(async () => {
+    const { DOMPet } = await import("/index.js");
+    window.makePet = () => new DOMPet({ debug: true, renderer: "sprite" });
     window.cycle = () => {
       for (let i = 0; i < 25; i++) {
         const pet = new DOMPet();

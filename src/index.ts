@@ -17,13 +17,14 @@ import { Scanner } from "./dom/scanner.js";
 import { drawPlatforms } from "./debug/platforms.js";
 import type { Snapshot } from "./world/platform.js";
 export interface DOMPetOptions extends ScanOptions {
+  renderer?: "auto" | "sprite" | "webgl";
   character?: "cat";
   speed?: number;
   gravity?: number;
   zIndex?: number;
   respectReducedMotion?: boolean;
   debug?: boolean;
-  /** Visual sprite width in CSS pixels. */
+  /** Character size in CSS pixels. */
   size?: number;
 }
 export type DOMPetState = "new" | "running" | "paused" | "hidden" | "destroyed";
@@ -109,7 +110,8 @@ export class DOMPet {
 
   #scanner: Scanner;
   #debug: boolean;
-  #size: number;
+  #renderer: NonNullable<DOMPetOptions["renderer"]>;
+  #size?: number;
   #disposeSprite?: () => void;
   #manual = false;
   #paused = false;
@@ -187,8 +189,14 @@ export class DOMPet {
         throw new TypeError(key + " must contain nonempty CSS selectors");
       this.#selectors.push(...list);
     }
-    this.#size = options.size ?? tabby.size;
-    if (!Number.isFinite(this.#size) || this.#size <= 0)
+    this.#renderer = options.renderer ?? "auto";
+    if (!["auto", "sprite", "webgl"].includes(this.#renderer))
+      throw new TypeError("Invalid renderer");
+    this.#size = options.size;
+    if (
+      this.#size !== undefined &&
+      (!Number.isFinite(this.#size) || this.#size <= 0)
+    )
       throw new RangeError("size must be positive and finite");
     this.#scanner = new Scanner(options);
     this.#debug = options.debug ?? false;
@@ -252,9 +260,12 @@ export class DOMPet {
     let width = 0,
       height = 0,
       ratio = 1;
-    const size = this.#size;
+    const override = this.#size;
+    const settings = this.#motion;
+    let size = override ?? 112;
     let animation = new Animation();
     const bounds = () => ({ width, height });
+    let initial = true;
     let body = spawn({ width: host.clientWidth, height: host.clientHeight });
     let graph: Graph;
     let explorer: Explorer;
@@ -264,7 +275,44 @@ export class DOMPet {
         new Error("Cat sprite unavailable; drawing fallback"),
       ),
     );
-    this.#disposeSprite = sprite.dispose;
+    const assetController = new AbortController();
+    let model:
+      | Awaited<ReturnType<typeof import("./rendering/scene.js").scene>>
+      | undefined;
+    let disposed = false;
+    const fallback = () => {
+      model?.dispose();
+      model = undefined;
+      host.dataset.renderer = "sprite";
+      draw();
+    };
+    host.dataset.renderer = this.#renderer === "sprite" ? "sprite" : "loading";
+    if (this.#renderer !== "sprite")
+      void import("./rendering/scene.js")
+        .then(async ({ scene }) => {
+          if (disposed) return;
+          const loaded = await scene(
+            host.shadowRoot!,
+            fallback,
+            assetController.signal,
+          );
+          if (disposed) {
+            loaded.dispose();
+            return;
+          }
+          model = loaded;
+          host.dataset.renderer = "webgl";
+          draw();
+        })
+        .catch(() => {
+          if (!disposed) fallback();
+        });
+    this.#disposeSprite = () => {
+      disposed = true;
+      assetController.abort();
+      model?.dispose();
+      sprite.dispose();
+    };
     this.#replan = () => {
       graph = new Graph(world.platforms, bounds(), this.#motion);
       explorer = new Explorer(graph);
@@ -279,28 +327,66 @@ export class DOMPet {
     });
     this.#reset = () => {
       this.#intent = { direction: 0, jump: false };
-      body = spawn(bounds());
+      body = spawn(bounds(), settings);
       animation = new Animation();
       draw();
     };
+    let dirty: [number, number, number, number] | undefined;
     function draw() {
       if (!ctx || document.hidden) return;
       const start = metrics ? performance.now() : 0;
       layout.checkRoute();
-      ctx.clearRect(0, 0, width, height);
+      if (metrics) ctx.clearRect(0, 0, width, height);
+      else if (dirty) ctx.clearRect(...dirty);
+      dirty = undefined;
       if (metrics) drawPlatforms(ctx, world, metrics);
       const left = body.x - size / 2,
         top = body.y - (size * tabby.anchorY) / tabby.width;
-      if (
-        !scanner.zones.some(
-          (r) =>
-            left < r.right &&
-            left + size > r.left &&
-            top < r.bottom &&
-            body.y > r.top,
-        )
-      )
+      const visible = !scanner.zones.some(
+        (r) =>
+          left < r.right &&
+          left + size > r.left &&
+          top < r.bottom &&
+          body.y > r.top,
+      );
+      if (model && visible) {
+        const support = world.platforms
+          .filter(
+            (p) =>
+              p.y >= body.y &&
+              p.y - body.y < size * 0.7 &&
+              p.intervals.some(([a, b]) => body.x >= a && body.x <= b),
+          )
+          .sort((a, b) => a.y - b.y)[0];
+        if (support) {
+          const span = support.intervals.find(
+            ([a, b]) => body.x >= a && body.x <= b,
+          )!;
+          dirty = [body.x - size * 0.22 - 2, support.y - 4, size * 0.44 + 4, 8];
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(span[0], support.y - 2, span[1] - span[0], 5);
+          ctx.clip();
+          ctx.fillStyle = `rgba(45,32,28,${0.23 * Math.max(0, 1 - (support.y - body.y) / (size * 0.7))})`;
+          ctx.beginPath();
+          ctx.ellipse(body.x, support.y, size * 0.22, 2, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+      if (model)
+        model.draw(
+          body,
+          animation,
+          size,
+          ratio,
+          visible,
+          metrics ? ctx : undefined,
+        );
+      else if (visible) {
         sprite.draw(ctx, animation, body, size, ratio);
+        dirty = [left - 2, top - 2, size + 4, size + 4];
+      }
       if (metrics) {
         metrics.physicsMs = physicsMs;
         metrics.navigationMs = navigationMs;
@@ -320,6 +406,14 @@ export class DOMPet {
       width = host.clientWidth;
       height = host.clientHeight;
       ratio = window.devicePixelRatio || 1;
+      size = Math.min(width, height, override ?? (width <= 600 ? 88 : 112));
+      settings.fullFootprint = true;
+      settings.width = size * 0.43;
+      settings.height = size * 0.56;
+      if (initial) {
+        body = spawn(bounds(), settings);
+        initial = false;
+      }
       canvas.width = Math.round(width * ratio);
       canvas.height = Math.round(height * ratio);
       ctx?.setTransform(ratio, 0, 0, ratio, 0, 0);
@@ -346,7 +440,7 @@ export class DOMPet {
           oldHeight = height;
         resize();
         const scanStart = metrics ? performance.now() : 0;
-        const next = scanner.scan(document);
+        const next = scanner.scan(document, settings.width);
         if (metrics) {
           metrics.scanMs = performance.now() - scanStart;
           metrics.platforms = next.platforms.length;
@@ -355,7 +449,7 @@ export class DOMPet {
           width !== oldWidth ||
           height !== oldHeight ||
           !sameGeometry(world.platforms, next.platforms);
-        body = carry(body, world.platforms, next.platforms, bounds());
+        body = carry(body, world.platforms, next.platforms, bounds(), settings);
         world = next;
         for (const p of world.platforms)
           if (p.source) scanner.roots.add(p.source);
@@ -422,6 +516,7 @@ export class DOMPet {
           grounded,
           this.#manual ? "manual" : explorer.state,
           stepSeconds * 1000,
+          this.#manual ? 0 : explorer.lookPitch(body),
         );
         if (metrics) physicsMs += performance.now() - physicsStart;
         this.#intent.jump = false;

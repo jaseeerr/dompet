@@ -2,6 +2,7 @@ import { expect, it } from "vitest";
 import {
   step,
   spawn,
+  supports,
   motion,
   stepSeconds,
   type Body,
@@ -109,3 +110,25 @@ it("matches 30, 60 and 120 Hz rendering and bounds work after a stall", () => {
   expect(replay([0]).steps).toBe(0);
   expect(replay([60000]).steps).toBe(8);
 });
+
+it.each([32, 88, 112, 144])(
+  "requires the configured paw span at size %i",
+  (size) => {
+    const settings = { ...motion, width: size * 0.43, fullFootprint: true };
+    for (const extra of [-0.1, 0, 0.1]) {
+      const half = (settings.width + extra) / 2;
+      const ledge = platform("ledge", 245, 100 - half, 100 + half);
+      expect(supports(ledge, 100, bounds.width, settings)).toBe(extra >= 0);
+      let body = step(
+        grounded,
+        { ...idle, jump: true },
+        [floor, ledge],
+        bounds,
+        settings,
+      );
+      for (let i = 0; i < 150; i++)
+        body = step(body, idle, [floor, ledge], bounds, settings);
+      expect(body.support).toBe(extra >= 0 ? "ledge" : "floor");
+    }
+  },
+);

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0-rc.1
+
+Adds a locally hosted Three.js tabby with six skins, eight portable animation clips, responsive sizing, footprint-aware navigation and context-loss recovery. The journal includes a rig inspector and renderer selection.
+
 ## 0.1.0 — 2026-11-24
 
 First private Git release. Consumers can install the tagged repository with lifecycle scripts disabled. CI compares the committed build with a clean build and checks a private Git install using a read-only job token.

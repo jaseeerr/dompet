@@ -81,7 +81,8 @@ export class Scanner {
       ...(options.exclusionZones ?? []),
     ].join(",");
   }
-  scan(doc: Document): Snapshot {
+  scan(doc: Document, footprint = 0): Snapshot {
+    const minimum = Math.max(this.minimum, footprint);
     this.roots = new Set([doc.documentElement, doc.body]);
     this.zones = this.zoneSelector
       ? Array.from(doc.querySelectorAll(this.zoneSelector)).flatMap((el) => {
@@ -214,7 +215,7 @@ export class Scanner {
         reject(reason);
         continue;
       }
-      if (right - left < this.minimum) {
+      if (right - left < minimum) {
         reject("too narrow");
         continue;
       }
@@ -247,7 +248,7 @@ export class Scanner {
           for (const interval of other.intervals)
             intervals = subtract(intervals, interval);
       }
-      intervals = intervals.filter(([a, b]) => b - a >= this.minimum);
+      intervals = intervals.filter(([a, b]) => b - a >= minimum);
       if (!intervals.length) {
         reject("no usable interval");
         continue;

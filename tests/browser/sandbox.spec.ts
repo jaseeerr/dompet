@@ -3,7 +3,7 @@ test("overlay leaves controls and nested scrolling usable", async ({
   page,
 }) => {
   await page.goto("/");
-  await expect(page.locator("[data-dompet] canvas")).toBeVisible();
+  await expect(page.locator("[data-dompet] canvas").first()).toBeVisible();
   await page.getByRole("button", { name: "Pause pet" }).click();
   await page.getByRole("button", { name: "Resume pet" }).click();
   await page.getByRole("button", { name: "Add a perch" }).click();
@@ -82,13 +82,13 @@ test("journal settings preserve pause and replace a single overlay", async ({
 }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "Pause pet" }).click();
-  await page.getByLabel("Cat size").selectOption("48");
+  await page.getByLabel("Cat size").selectOption("144");
   await page.getByLabel("Walking speed").selectOption("1.6");
   await page.getByLabel("Debug platforms").check();
   await expect(page.locator("[data-dompet]")).toHaveCount(1);
   await expect(page.getByRole("button", { name: "Resume pet" })).toBeVisible();
   await page.getByRole("button", { name: "Inspect physics" }).click();
-  await expect(page.locator("#motion")).toContainText("22.0");
+  await expect(page.locator("#motion")).toContainText("80.6");
   await page.getByLabel("Debug platforms").uncheck();
   await expect(page.locator("#physics")).toBeHidden();
 });

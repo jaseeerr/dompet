@@ -14,6 +14,8 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm run lint
+      - run: node scripts/export-cat.mjs && git diff --exit-code -- src/characters/tabby.glb
+      - run: npm run check:cat
       - run: npm test
       - run: npm run build
       - name: Verify committed distribution

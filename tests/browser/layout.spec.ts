@@ -210,7 +210,7 @@ test("updates clipping, exclusion zones and replacement landing surfaces during 
     )
     .toBe(false);
   await page.evaluate(() => document.body.replaceChildren());
-  await expect(page.locator("[data-dompet] canvas")).toBeVisible();
+  await expect(page.locator("[data-dompet] canvas").first()).toBeVisible();
   await expect
     .poll(() =>
       page.evaluate(() => window.fixture.world.platforms.map((p) => p.id)),

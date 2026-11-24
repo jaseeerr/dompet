@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" /><meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  /><title>Tabby character inspector</title>
+  <style>
+    body {
+      font: 16px system-ui;
+      color: #352e29;
+      background: #eee8df;
+      max-width: 54rem;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    canvas {
+      width: 100%;
+      height: min(60vh, 26rem);
+      display: block;
+    }
+    label,
+    a {
+      margin-right: 1rem;
+    }
+    select,
+    input {
+      vertical-align: middle;
+    }
+  </style>
+  <a href="./">Field journal</a>
+  <h1>Tabby character inspector</h1>
+  <canvas aria-label="Three-dimensional tabby preview"></canvas>
+  <label
+    >Pose
+    <select id="clip"></select></label
+  ><label
+    >Angle <input id="angle" type="range" min="-180" max="180" value="-18"
+  /></label>
+  <label
+    >Playback speed
+    <select id="rate">
+      <option>1</option>
+      <option>0.25</option>
+      <option>0</option>
+    </select></label
+  >
+  <label
+    >Display size
+    <select id="scale">
+      <option value="">Enlarged</option>
+      <option>112</option>
+      <option>88</option>
+    </select></label
+  >
+  <label
+    >Surface
+    <select id="surface">
+      <option value="#eee8df">Pale</option>
+      <option value="#272623">Dark</option>
+      <option
+        value="repeating-linear-gradient(35deg,#dbcdbd 0px 6px,#e9dfd5 6px 12px)"
+      >
+        Pattern
+      </option>
+    </select></label
+  >
+  <label
+    >Clip position
+    <input id="seek" type="range" min="0" max="1" step=".01" value="0"
+  /></label>
+  <script type="module" src="./character.js"></script>
+</html>

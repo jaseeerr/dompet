@@ -1,6 +1,6 @@
 {
   "name": "dompet",
-  "version": "0.1.0",
+  "version": "1.0.0-rc.1",
   "private": true,
   "type": "module",
   "sideEffects": false,
@@ -12,14 +12,13 @@
   },
   "types": "./dist/index.d.ts",
   "files": [
-    "dist/index.js",
-    "dist/index.d.ts",
-    "dist/types.d.ts",
+    "dist",
     "examples",
     "src/characters/ART.md",
     "benchmarks/RESULTS.md",
     "CHANGELOG.md",
-    "LICENSE"
+    "LICENSE",
+    "THIRD-PARTY-THREE.txt"
   ],
   "scripts": {
     "dev": "vite demo",
@@ -29,7 +28,8 @@
     "format": "prettier --write .",
     "test": "vitest run tests/unit",
     "test:e2e": "playwright test",
-    "benchmark": "npm run build && node benchmarks/run.mjs"
+    "benchmark": "npm run build && node benchmarks/run.mjs",
+    "check:cat": "node scripts/check-cat.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.65.1",
@@ -43,5 +43,8 @@
     "vite": "^7.3.8",
     "vitest": "^4.1.12"
   },
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "dependencies": {
+    "three": "0.180.0"
+  }
 }

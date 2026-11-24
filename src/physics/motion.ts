@@ -5,6 +5,7 @@ import type { Platform } from "../world/platform.js";
 export const stepSeconds = 1 / 120;
 export const motion = {
   width: 30,
+  fullFootprint: false,
   height: 22,
   speed: 180,
   gravity: 1200,
@@ -20,24 +21,30 @@ export interface Intent {
   jump: boolean;
 }
 
-export function spawn(bounds: Bounds): Body {
+export function spawn(bounds: Bounds, settings = motion): Body {
   return {
     x: Math.min(
       bounds.width / 2,
-      Math.max(motion.width / 2, bounds.width * 0.4),
+      Math.max(settings.width / 2, bounds.width * 0.4),
     ),
-    y: Math.min(bounds.height, motion.height),
+    y: Math.min(bounds.height, settings.height),
     vx: 0,
     vy: 0,
     support: null,
   };
 }
-export function supports(platform: Platform, x: number, width: number) {
-  const half = Math.min(motion.width, width) / 2;
+export function supports(
+  platform: Platform,
+  x: number,
+  width: number,
+  settings = motion,
+) {
+  const half = Math.min(settings.width, width) / 2;
   return platform.intervals.some(
     ([left, right]) =>
       Math.min(right, x + half) - Math.max(left, x - half) >=
-        Math.min(4, half * 2) && right > left,
+        (settings.fullFootprint ? half * 2 - 1e-7 : Math.min(4, half * 2)) &&
+      right > left,
   );
 }
 
@@ -64,8 +71,8 @@ export function step(
     body.x < 0 ||
     body.x > width
   )
-    return spawn(bounds);
-  const half = Math.min(width, motion.width) / 2;
+    return spawn(bounds, settings);
+  const half = Math.min(width, settings.width) / 2;
   const targetX = body.x + intent.direction * settings.speed * stepSeconds;
   const clampX = (value: number) =>
     Math.max(half, Math.min(width - half, value));
@@ -73,9 +80,11 @@ export function step(
   const vx = x === targetX ? intent.direction * settings.speed : 0;
   const standing = platforms.find(
     (p) =>
-      p.id === body.support && p.y === body.y && supports(p, body.x, width),
+      p.id === body.support &&
+      p.y === body.y &&
+      supports(p, body.x, width, settings),
   );
-  if (standing && !intent.jump && supports(standing, x, width))
+  if (standing && !intent.jump && supports(standing, x, width, settings))
     return { x, y: standing.y, vx, vy: 0, support: standing.id };
   const initialVy = standing && intent.jump ? -motion.jumpSpeed : body.vy;
   let vy = Math.min(
@@ -89,7 +98,7 @@ export function step(
       if (
         p.y < body.y ||
         p.y > y ||
-        p.y < Math.min(height, motion.height) ||
+        p.y < Math.min(height, settings.height) ||
         p.y > height ||
         (landing && p.y >= landing.y)
       )
@@ -97,8 +106,8 @@ export function step(
       const fraction = (p.y - body.y) / (y - body.y);
       const crossingX = clampX(body.x + (targetX - body.x) * fraction);
       if (
-        supports(p, crossingX, width) &&
-        (p.y !== body.y || supports(p, x, width))
+        supports(p, crossingX, width, settings) &&
+        (p.y !== body.y || supports(p, x, width, settings))
       )
         landing = p;
     }
@@ -109,13 +118,13 @@ export function step(
       y: landing.y,
       vx,
       vy: 0,
-      support: supports(landing, x, width) ? landing.id : null,
+      support: supports(landing, x, width, settings) ? landing.id : null,
     };
-  const ceiling = Math.min(height, motion.height);
+  const ceiling = Math.min(height, settings.height);
   if (y < ceiling) {
     y = ceiling;
     vy = 0;
   }
-  if (y > height) return spawn(bounds);
+  if (y > height) return spawn(bounds, settings);
   return { x, y, vx, vy, support: null };
 }

@@ -5,18 +5,19 @@ export function carry(
   old: Platform[],
   next: Platform[],
   bounds: Bounds,
+  settings = motion,
 ): Body {
   if (!body.support) return body;
   const before = old.find((p) => p.id === body.support),
     after = next.find((p) => p.id === body.support);
-  if (before && after && after.y >= Math.min(bounds.height, motion.height)) {
-    const half = Math.min(bounds.width, motion.width) / 2;
+  if (before && after && after.y >= Math.min(bounds.height, settings.height)) {
+    const half = Math.min(bounds.width, settings.width) / 2;
     const x =
       body.x + (after.originX ?? after.left) - (before.originX ?? before.left);
     if (
       x >= half &&
       x <= bounds.width - half &&
-      supports(after, x, bounds.width)
+      supports(after, x, bounds.width, settings)
     )
       return { ...body, x, y: after.y };
   }

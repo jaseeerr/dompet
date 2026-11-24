@@ -1,5 +1,28 @@
 # Phase 8 reference measurements
 
+## V1 candidate measurements
+
+Chromium 159 ran on an Apple M5, Darwin 25.6.0. Metal used the physical GPU. The software run used ANGLE SwiftShader. Each fixture compares 90 scrolling frames with the pet enabled and disabled. Startup includes the same-origin renderer and model load from the local benchmark route, shader initialization and the first rendered pet. GPU time is a single timer-query sample and includes first-use effects. Times are milliseconds.
+
+| DOM nodes | CPU throttle | Viewport | Renderer | Metal baseline p95 | Metal pet p95 | SwiftShader pet p95 | Metal startup | Metal GPU sample |
+| ---: | ---: | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| 100 | 1× | 1280 × 720 | webgl | 16.8 | 16.8 | 50 | 569 | 12.64 |
+| 1,000 | 1× | 1280 × 720 | webgl | 16.7 | 16.7 | 33.3 | 104 | 0.23 |
+| 5,000 | 1× | 1280 × 720 | webgl | 16.7 | 33.3 | 33.4 | 115 | 1.56 |
+| 1,000 | 4× | 1280 × 720 | webgl | 16.7 | 33.4 | 50.1 | 266 | 6.61 |
+| 1,000 | 1× | 390 × 844 | webgl | 16.7 | 16.8 | 33.3 | 100 | 0.68 |
+| 1,000 | 1× | Desktop | sprite | 16.7 | 16.7 | 16.7 | 12 | — |
+
+Each WebGL frame submitted 36 draw calls and 16,904 triangles. Vertex colors supply the markings with zero image textures and zero decoder bytes. SwiftShader did not expose a GPU timer. The mobile viewport caps device pixel ratio at 1.5 and desktop caps it at 2. These runs use desktop browser engines. Physical iPhone Safari verification is pending because Web Inspector was disabled on the paired device.
+
+- index.js is 35,766 bytes, 12,813 with gzip.
+- scene-C1PpzIyK.js is 964,577 bytes, 205,319 with gzip.
+- tabby.glb is 502,636 bytes, 116,930 with gzip.
+
+The model fits the 3 MiB character budget. Compare the Metal pet p95 against 16.7 ms on desktop and 33.3 ms in the mobile fixture. Software rendering missed the desktop target. The 100-cycle Chromium graphics test checked that each context reported loss after destroy and that each overlay disconnected. The five-minute seeded simulation recorded 82 landings.
+
+## Prototype measurements
+
 Measured on November 24, 2026 with an Apple M5, Darwin 25.6.0, Node 24.18.0 and headless Chromium 159.0.8154.6. Repeat with `npm run benchmark` after installing Playwright Chromium. Timing thresholds are reference targets. Shared CI runners execute correctness checks; they do not gate releases on hardware-specific timings.
 
 ## Method

@@ -3,3 +3,11 @@
 The orange tabby with a teal collar is original pixel art drawn for DOMPet during phase 5. All frames were composed for this project. No third-party art or attribution is used. The sheet is included for use with this private package under the project's private-use permissions.
 
 Each cell is 32 × 24 pixels and faces right. The foot anchor is (16, 23), measured from the upper-left corner. Frames run left to right in the order defined in the character metadata.
+
+## V1 three-dimensional tabby
+
+The editable master is model.js. Its mesh shapes, coat markings and material colors are generated specifically for DOMPet. It uses no external model, photograph or texture. Run `node scripts/export-cat.mjs` to regenerate tabby.glb with Three.js GLTFExporter. The ground is Y = 0 and the nose points along positive X. The joint hierarchy and named meshes are preserved in the binary glTF export.
+
+The neutral silhouette measures 2.62648 model units across the gameplay camera. Each limb has a hip or shoulder, knee, ankle and contact marker. Prefixes are `foreNear`, `foreFar`, `hindNear` and `hindFar`. Contact markers sit at (0.044, −0.09, 0) relative to their ankles. The pelvis and chest weight the torso. Seven tail bones weight the tapered tail. Eyelid nodes control visible eye height, and paired ear hinges carry their inner and outer surfaces. Stripe color is stored per vertex. The asset has no image textures or decoder dependency.
+
+The export contains the pose reel and idle, walk, turn, jump, fall, land and sleep clips. The game samples its procedural pose against actual distance, velocity and support. The inspector plays the portable glTF clips. Run `npm run check:cat` after re-exporting to validate skins, clips, transforms, contact names and planted paw drift.

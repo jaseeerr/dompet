@@ -93,7 +93,7 @@ dompet/
 
 Complete each phase's acceptance criteria before proceeding. Maintain a runnable demo and regression tests throughout. Mark checklist items complete only after implementation and verification.
 
-The executable plans are in [phase 1](phases/phase1.md), [phase 2](phases/phase2.md), [phase 3](phases/phase3.md), [phase 4](phases/phase4.md), [phase 5](phases/phase5.md), [phase 6](phases/phase6.md), [phase 7](phases/phase7.md), [phase 8](phases/phase8.md), [phase 9](phases/phase9.md), [phase 10](phases/phase10.md).
+The executable plans are in [phase 1](phases/prototype/phase1.md), [phase 2](phases/prototype/phase2.md), [phase 3](phases/prototype/phase3.md), [phase 4](phases/prototype/phase4.md), [phase 5](phases/prototype/phase5.md), [phase 6](phases/prototype/phase6.md), [phase 7](phases/prototype/phase7.md), [phase 8](phases/prototype/phase8.md), [phase 9](phases/prototype/phase9.md), [phase 10](phases/prototype/phase10.md).
 
 ### Phase 1 — Project foundation and developer sandbox
 
@@ -343,7 +343,7 @@ Local performance and regression checks passed. Hosted release CI passed. [Refer
 
 **Acceptance:** The package works outside its own repository, documentation matches implementation, and release candidate has no critical known defects.
 
-The private 0.1.0-rc.1 tarball and consumer verification are recorded in [phase 9](phases/phase9.md). All CI commands passed locally. Hosted release CI passed.
+The private 0.1.0-rc.1 tarball and consumer verification are recorded in [phase 9](phases/prototype/phase9.md). All CI commands passed locally. Hosted release CI passed.
 
 ### Phase 10 — Private GitHub package distribution
 
@@ -416,7 +416,7 @@ For immutable dependency pinning, use the verified commit SHA instead of a tag. 
 - [x] Private GitHub repository and versioned tag exist; authorized Git installation is verified.
 - [x] No runtime telemetry, unnecessary external requests or public package publication.
 
-See the [release record](phases/phase10.md) for verification and the private branch-protection plan limitation.
+See the [release record](phases/prototype/phase10.md) for verification and the private branch-protection plan limitation.
 
 ## 5. Post-MVP backlog
 

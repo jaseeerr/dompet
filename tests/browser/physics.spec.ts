@@ -26,5 +26,5 @@ test("walk, jump, inspect and reset the pet on scanned surfaces", async ({
   expect(Number((await inspect())[1])).toBeGreaterThan(Number(standing[1]));
   await click("Pause pet");
   await click("Reset pet");
-  expect((await inspect())[2]).toBe("22.0");
+  expect((await inspect())[2]).toBe("62.7");
 });

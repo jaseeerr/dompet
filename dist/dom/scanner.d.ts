@@ -11,5 +11,5 @@ export declare class Scanner {
     zones: DOMRect[];
     roots: Set<Element>;
     constructor(options: ScanOptions);
-    scan(doc: Document): Snapshot;
+    scan(doc: Document, footprint?: number): Snapshot;
 }

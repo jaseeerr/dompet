@@ -59,13 +59,16 @@ test("debug view paints platform lines while paused", async ({ page }) => {
   await page.goto("/?debug");
   await page.getByRole("button", { name: "Pause pet" }).click();
   await page.getByRole("button", { name: "Refresh surfaces" }).click();
-  const pixel = await page.locator("[data-dompet] canvas").evaluate((el) => {
-    const canvas = el as HTMLCanvasElement;
-    return Array.from(
-      canvas
-        .getContext("2d")!
-        .getImageData(canvas.width - 10, canvas.height - 1, 1, 1).data,
-    );
-  });
+  const pixel = await page
+    .locator("[data-dompet] canvas")
+    .first()
+    .evaluate((el) => {
+      const canvas = el as HTMLCanvasElement;
+      return Array.from(
+        canvas
+          .getContext("2d")!
+          .getImageData(canvas.width - 10, canvas.height - 1, 1, 1).data,
+      );
+    });
   expect(pixel).toEqual([173, 32, 91, 255]);
 });

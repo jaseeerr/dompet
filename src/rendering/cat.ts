@@ -7,13 +7,37 @@ export class Animation {
   clip: Clip = "fall";
   facing: 1 | -1 = tabby.facing;
   elapsed = 0;
+  distance = 0;
+  clock = 0;
+  heading = 0;
+  sleep = 0;
+  anticipation = 0;
+  impact = 0;
+  descent = 0;
+  gaze = 0;
   update(
     body: Body,
     wasGrounded: boolean,
     behaviour: Behaviour | "manual",
     ms: number,
+    pitch = 0,
   ) {
     if (body.vx) this.facing = body.vx < 0 ? -1 : 1;
+    this.clock += ms;
+    this.gaze += (pitch - this.gaze) * Math.min(1, ms / 110);
+    this.anticipation +=
+      ((behaviour === "prepare-jump" ? 1 : 0) - this.anticipation) *
+      Math.min(1, ms / 55);
+    if (!body.support) this.descent = Math.max(0, body.vy);
+    else if (!wasGrounded) this.impact = Math.min(1, this.descent / 520);
+    this.sleep +=
+      ((body.support && behaviour === "sleep" ? 1 : 0) - this.sleep) *
+      Math.min(1, ms / 170);
+    if (body.support) this.distance += (Math.abs(body.vx) * ms) / 1000;
+    const target = this.facing === 1 ? 0 : 1;
+    this.heading +=
+      Math.sign(target - this.heading) *
+      Math.min(Math.abs(target - this.heading), ms / 180);
     let next: Clip;
     if (!body.support) next = body.vy < 0 ? "jump" : "fall";
     else if (

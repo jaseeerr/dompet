@@ -18,6 +18,7 @@ export declare class Graph {
     private bounds;
     readonly settings: {
         width: number;
+        fullFootprint: boolean;
         height: number;
         speed: number;
         gravity: number;
@@ -32,6 +33,7 @@ export declare class Graph {
     private cache;
     constructor(platforms: Platform[], bounds: Bounds, settings?: {
         width: number;
+        fullFootprint: boolean;
         height: number;
         speed: number;
         gravity: number;

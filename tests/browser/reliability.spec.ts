@@ -72,7 +72,7 @@ test("100 teardown cycles release observers and RAFs without reading input or se
       original.call(this, type, fn, options);
     };
     for (let i = 0; i < 100; i++) {
-      const pet = new DOMPet();
+      const pet = new DOMPet({ renderer: "sprite" });
       pet.start();
       history.replaceState({}, "", "?view=" + i);
       input.className = "field-" + i;

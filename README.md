@@ -3,13 +3,13 @@ A framework-independent browser pet. An animated orange tabby walks, jumps and n
 
 ## Install the private release
 
-With read access to `jaseeerr/dompet` and GitHub SSH authentication configured, install the tagged package from your application directory:
+With read access to `jaseeerr/dompet` and GitHub SSH authentication configured, install the V1 candidate from your application directory:
 
 ```sh
-npm install 'git+ssh://git@github.com/jaseeerr/dompet.git#v0.1.0'
+npm install 'git+ssh://git@github.com/jaseeerr/dompet.git#main'
 ```
 
-For an immutable pin, replace `v0.1.0` with the full commit SHA returned by `git ls-remote git@github.com:jaseeerr/dompet.git 'refs/tags/v0.1.0^{}'`. Commit your application's lockfile and use `npm ci` in subsequent builds. The repository tracks the compiled ESM library, declarations and embedded sprite. Installing with `--ignore-scripts` is supported.
+For an immutable pin, replace `main` with the full commit SHA returned by `git ls-remote git@github.com:jaseeerr/dompet.git refs/heads/main`. Commit your application's lockfile and use `npm ci` in subsequent builds. The repository tracks the compiled ESM library, declarations and self-hosted character assets. Installing with `--ignore-scripts` is supported.
 
 For a private CI consumer, grant its deploy key read-only access and load the private key from the CI secret store. Use verified GitHub host keys. An approved read-only machine credential can also authenticate Git through a credential helper. Keep credentials out of dependency URLs, lockfiles and logs.
 
@@ -51,7 +51,8 @@ All constructor options are optional.
 | Option | Default | Meaning |
 | --- | --- | --- |
 | `character` | `"cat"` | Bundled tabby character |
-| `size` | `32` | Positive visual width in CSS pixels |
+| `size` | 112 desktop, 88 at viewport widths up to 600 px | Positive character size in CSS pixels, capped to the viewport |
+| `renderer` | `"auto"` | Prefer WebGL with sprite fallback. Choose `"sprite"` to load only the original tabby or `"webgl"` to request 3D with recovery. |
 | `speed` | `1` | Positive horizontal speed multiplier on 180 CSS pixels per second |
 | `gravity` | `1200` | Positive downward acceleration in CSS pixels per second squared |
 | `include`, `exclude`, `exclusionZones` | Empty arrays | CSS selectors for extra candidates, ignored subtrees and protected rectangles |
@@ -83,7 +84,7 @@ TypeScript consumers can import `DOMPetOptions`, `DOMPetState`, and `DOMPetEvent
 
 ## Platform discovery
 
-Enable the canvas inspector with **Debug platforms** in the playground, or construct `new DOMPet({ debug: true, include: ['.ledge'], exclude: ['.menu'], minPlatformWidth: 15 })`. Include selectors add candidates. Exclusions skip matching subtrees, including elements marked `data-dompet-ignore`. Width is in viewport CSS pixels and defaults to 15 CSS pixels.
+Enable the canvas inspector with **Debug platforms** in the playground, or construct `new DOMPet({ debug: true, include: ['.ledge'], exclude: ['.menu'], minPlatformWidth: 15 })`. Include selectors add candidates. Exclusions skip matching subtrees, including elements marked `data-dompet-ignore`. The scanner applies both the configured minimum width (15 CSS pixels by default) and the resolved paw footprint.
 
 DOMPet refreshes automatically after scrolling, resizing, route changes and DOM updates. Call `pet.refresh()` to synchronously rescan a custom layout. Lines mark usable intervals, with stable element IDs and a viewport floor. The inspector counts rejected candidates by reason. Top-edge visibility uses sampled browser hit tests, so thin occluders, pointer-transparent layers and transformed geometry can be approximate. Discovery covers the light DOM of the current document.
 
@@ -101,7 +102,9 @@ A refresh that changes the platform geometry or viewport invalidates the current
 
 ## Cat rendering
 
-The package embeds the original 15-frame tabby sheet. Its idle, walk, jump, fall, landing and sleep clips advance on the simulation clock, so pausing freezes the current frame. Set the visual width with `new DOMPet({ size: 48 })`. The default is 32 CSS pixels. Scaling keeps the feet anchored to the physics body, which retains its 30 × 22 CSS-pixel collision shape. An undecoded or unavailable image uses a canvas fallback. [Art provenance](src/characters/ART.md)
+DOMPet loads Three.js and its rigged tabby on demand. The four-legged walk, takeoff, landing, blink and sleep poses share the simulation clock. The support footprint is 43% of the resolved size. To retain the prototype appearance, use `new DOMPet({renderer:"sprite", size:32})`.
+
+For direct ESM deployment, copy the entire `dist/` directory under your site path and import its `index.js`. Keep `chunks/` and `assets/` beside it. Allow same-origin scripts and model fetches in CSP and permit `data:` images for the embedded fallback. A failed import, model request or WebGL context switches to the sprite at the current feet. Inspect `[data-dompet]` and its `data-renderer` attribute for loading, webgl or sprite. Vite consumers can import the package by name. [Art provenance](src/characters/ART.md)
 
 ## Dynamic layouts
 
@@ -115,7 +118,7 @@ Geometry uses axis-aligned viewport rectangles and sampled hit tests in the curr
 
 With `debug: true`, read `pet.debugMetrics` for the latest scanner, refresh, physics, navigation, render and update/render timings in milliseconds. It also reports platform count, graph nodes, cached edges and planning attempts. Metrics are local to the instance and are released on destroy.
 
-Run `npm run benchmark` with Playwright Chromium installed to repeat the reference workloads. The benchmark prints JSON lines for each node count, CPU throttle setting and heap sample. See the [phase 8 measurements](benchmarks/RESULTS.md) for results and discovery limits.
+Run `npm run benchmark` with Playwright Chromium installed to repeat the reference workloads. The benchmark prints JSON lines for each node count, CPU throttle setting and heap sample. Set `DOMPET_BENCH_GPU=metal` on an Apple GPU to use hardware rendering. The report includes the renderer, draw calls, triangles, load time, frame intervals and GPU timing where available. [Benchmark results](benchmarks/RESULTS.md)
 
 ## Accessibility and troubleshooting
 

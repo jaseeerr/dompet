@@ -17,6 +17,7 @@ export declare class Explorer {
     private failures;
     private blocked;
     constructor(graph: Graph, random?: () => number);
+    lookPitch(body: Body): number;
     private rest;
     private fail;
     private plan;

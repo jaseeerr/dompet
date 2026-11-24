@@ -1,12 +1,13 @@
 import type { Behaviour, Body, ScanOptions } from "./types.js";
 export interface DOMPetOptions extends ScanOptions {
+    renderer?: "auto" | "sprite" | "webgl";
     character?: "cat";
     speed?: number;
     gravity?: number;
     zIndex?: number;
     respectReducedMotion?: boolean;
     debug?: boolean;
-    /** Visual sprite width in CSS pixels. */
+    /** Character size in CSS pixels. */
     size?: number;
 }
 export type DOMPetState = "new" | "running" | "paused" | "hidden" | "destroyed";

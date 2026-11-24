@@ -38,10 +38,10 @@ export class Graph {
     private bounds: Bounds,
     readonly settings = motion,
   ) {
-    const half = Math.min(motion.width, bounds.width) / 2;
+    const half = Math.min(this.settings.width, bounds.width) / 2;
     for (const platform of platforms) {
       if (
-        platform.y < Math.min(motion.height, bounds.height) ||
+        platform.y < Math.min(this.settings.height, bounds.height) ||
         platform.y > bounds.height
       )
         continue;
@@ -58,8 +58,11 @@ export class Graph {
       const surfaces: Surface[] = [];
       for (const [i, [a, b]] of platform.intervals.entries()) {
         const span: Interval = [
-          Math.max(a, half),
-          Math.min(b, bounds.width - half),
+          Math.max(a + (settings.fullFootprint ? half : 0), half),
+          Math.min(
+            b - (settings.fullFootprint ? half : 0),
+            bounds.width - half,
+          ),
         ];
         if (span[0] > span[1]) continue;
         surfaces.push({ platform, key: platform.id + "/" + i, span });
@@ -75,7 +78,7 @@ export class Graph {
       distance = Infinity;
     for (const s of this.byPlatform.get(body.support) ?? []) {
       const d = Math.max(0, s.span[0] - body.x, body.x - s.span[1]);
-      if (d < distance && d <= motion.width / 2) {
+      if (d < distance && d <= this.settings.width / 2) {
         best = s;
         distance = d;
       }
@@ -157,7 +160,10 @@ export class Graph {
       const to = this.locate(body);
       if (to !== s) {
         if (!to) return;
-        const margin = jump || airborne ? 0 : motion.width / 2 - 4;
+        const margin =
+          jump || airborne || this.settings.fullFootprint
+            ? 0
+            : this.settings.width / 2 - 4;
         const left = Math.max(to.span[0] - margin, body.x - stride),
           right = Math.min(to.span[1] + margin, body.x + stride);
         if (right < left) return;

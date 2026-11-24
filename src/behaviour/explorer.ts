@@ -19,6 +19,15 @@ export class Explorer {
     private graph: Graph,
     private random: () => number = Math.random,
   ) {}
+  lookPitch(body: Body): number {
+    const next = this.path[0];
+    if (!next || !body.support) return 0;
+    const dx = Math.abs((next.landing[0] + next.landing[1]) / 2 - body.x);
+    return Math.max(
+      -0.22,
+      Math.min(0.22, Math.atan2(body.y - next.to.platform.y, Math.max(1, dx))),
+    );
+  }
   private rest() {
     this.state = this.random() < 0.18 ? "sleep" : "idle";
     this.wait = Math.round(

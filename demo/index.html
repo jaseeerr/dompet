@@ -29,14 +29,22 @@
           aria-label="Pixel-art reading nook with a sunny window, books and a potted plant"
         ></canvas>
       </header>
+      <p><a href="./character.html">Inspect the tabby rig and animations</a></p>
       <section class="settings" aria-label="Pet settings">
+        <label
+          >Renderer
+          <select id="renderer">
+            <option value="auto">Automatic 3D</option>
+            <option value="sprite">Sprite</option>
+          </select></label
+        >
         <button id="toggle">Pause pet</button
         ><label
           >Cat size
           <select id="size">
-            <option value="24">Small</option>
-            <option value="32" selected>Medium</option>
-            <option value="48">Large</option>
+            <option value="88">Small · 88 px</option>
+            <option value="" selected>Responsive</option>
+            <option value="144">Large · 144 px</option>
           </select></label
         >
         <label
