@@ -14,13 +14,13 @@ Begin after the acceptance checks in [phase 9](phase9.md) pass.
 
 - [ ] Create a private repository, e.g. `jaseeerr/dompet`, and push the complete source, tests and documentation.
 - [ ] Configure access for authorized collaborators only; use branch protection and required CI checks where available.
-- [ ] Set package name `dompet`, version `0.1.0`, `private: true`, `type: module`, and appropriate `exports`, `types`, `files` and `sideEffects` metadata.
+- [x] Set package name `dompet`, version `0.1.0`, `private: true`, `type: module`, and appropriate `exports`, `types`, `files` and `sideEffects` metadata.
 - [ ] Keep the release build reproducible. For MVP Git installs, generate and commit the `dist/` artifacts at release time so consumers do not require build-time dev dependencies or install lifecycle scripts. Ensure those artifacts are tracked despite ignore rules.
-- [ ] Make CI verify that the committed release artifacts match a clean build; include runtime assets in `dist/`.
+- [x] Make CI verify that the committed release artifacts match a clean build; include runtime assets in `dist/`.
 - [ ] Verify no secrets, credentials, local environment files or unlicensed assets are committed. Store any CI credentials as secrets, not source files.
 - [ ] Run final CI and package smoke tests; bump version and update changelog.
 - [ ] Tag the verified release `v0.1.0` and optionally create a private GitHub Release with notes and the packed tarball.
-- [ ] Document authenticated SSH Git installation and pinned tag/commit usage. For CI consumers, use a scoped read-only deploy key or approved machine credential; never embed tokens in package.json, lockfiles or URLs.
+- [x] Document authenticated SSH Git installation and pinned tag/commit usage. For CI consumers, use a scoped read-only deploy key or approved machine credential; never embed tokens in package.json, lockfiles or URLs.
 
 **Example package metadata (adjust actual output paths)**
 
@@ -64,3 +64,5 @@ For immutable dependency pinning, use the verified commit SHA instead of a tag. 
 - Verify pinned installation and `npm ci` work after subsequent development commits.
 
 **Acceptance:** An authorized developer can install the private tagged package directly from GitHub and initialize the pet successfully. No public repository or npm registry publication has occurred.
+
+The repository is private and the owner is its only listed collaborator. The GitHub account plan does not support protection rules for this private repository.

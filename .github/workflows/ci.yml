@@ -1,0 +1,48 @@
+name: DOMPet checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - name: Verify committed distribution
+        run: |
+          git diff --exit-code -- dist
+          test -z "$(git ls-files --others --exclude-standard -- dist)"
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npm run test:e2e
+
+  private-consumer:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install from the private Git repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd "$RUNNER_TEMP"
+          mkdir dompet-consumer
+          cd dompet-consumer
+          npm init -y >/dev/null
+          git config --global credential.https://github.com.helper '!f() { if [ "$1" = get ]; then printf "username=x-access-token\npassword=%s\n" "$GH_TOKEN"; fi; }; f'
+          git config --global url."https://github.com/".insteadOf ssh://git@github.com/
+          ref="$GITHUB_SHA"
+          if [ "$GITHUB_REF_TYPE" = tag ]; then ref="$GITHUB_REF_NAME"; fi
+          npm install --ignore-scripts "git+ssh://git@github.com/${GITHUB_REPOSITORY}.git#${ref}"
+          npm ci --ignore-scripts
+          node --input-type=module -e "import {DOMPet} from 'dompet'; new DOMPet().destroy()"
+          node -e "const lock=require('fs').readFileSync('package-lock.json','utf8'); if(lock.includes(process.env.GH_TOKEN)||!lock.includes(process.env.GITHUB_SHA)) process.exit(1)"

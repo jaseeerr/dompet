@@ -2,43 +2,84 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>DOMPet playground</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#f8f5eb" />
+    <title>The Perch — DOMPet field journal</title>
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
-    <nav>
-      <strong>DOMPet</strong><a href="#habitat">Habitat</a
-      ><a href="#notes">Field notes</a>
+    <nav aria-label="Journal navigation">
+      <strong><span class="paw" aria-hidden="true">✳</span> The Perch</strong
+      ><a href="#habitat">Habitat</a><a href="#notes">Field notes</a>
     </nav>
     <main>
-      <header>
-        <h1>Pet playground</h1>
-        <p>Watch the cat land on the page. Open debug mode to move it.</p>
-        <a href="?debug">Debug platforms</a>
-        <button id="refresh">Refresh surfaces</button>
-        <button id="toggle">Pause pet</button>
-        <fieldset id="physics" hidden data-dompet-ignore>
-          <legend>Physics controls</legend>
-          <button id="left">Walk left</button
-          ><button id="stop">Stop walking</button
-          ><button id="right">Walk right</button> <button id="jump">Jump</button
-          ><button id="reset">Reset pet</button
-          ><button id="inspect">Inspect physics</button>
-          <output id="motion"></output>
-        </fieldset>
+      <header class="cover">
+        <div class="intro">
+          <h1>A house cat’s<br /><em>field journal.</em></h1>
+          <p>
+            Follow a small tabby through its favourite indoor perches. Record
+            what you spot along the way.
+          </p>
+        </div>
+        <canvas
+          id="room"
+          width="152"
+          height="80"
+          role="img"
+          aria-label="Pixel-art reading nook with a sunny window, books and a potted plant"
+        ></canvas>
       </header>
+      <section class="settings" aria-label="Pet settings">
+        <button id="toggle">Pause pet</button
+        ><label
+          >Cat size
+          <select id="size">
+            <option value="24">Small</option>
+            <option value="32" selected>Medium</option>
+            <option value="48">Large</option>
+          </select></label
+        >
+        <label
+          >Walking speed
+          <select id="speed">
+            <option value="0.6">Slow</option>
+            <option value="1" selected>Normal</option>
+            <option value="1.6">Brisk</option>
+          </select></label
+        >
+        <label class="check"
+          ><input type="checkbox" id="debug" /> Debug platforms</label
+        ><button id="refresh">Refresh surfaces</button>
+      </section>
+      <fieldset id="physics" hidden data-dompet-ignore>
+        <legend>Physics controls</legend>
+        <button id="left">Walk left</button>
+        <button id="stop">Stop walking</button>
+        <button id="right">Walk right</button> <button id="jump">Jump</button>
+        <button id="reset">Reset pet</button>
+        <button id="explore">Explore</button>
+        <button id="inspect">Inspect physics</button
+        ><output id="motion"></output>
+      </fieldset>
       <section id="habitat">
-        <h2>Habitat</h2>
-        <button id="add">Add a perch</button>
+        <div class="section-head">
+          <h2>Habitat guide</h2>
+          <button id="add">Add a perch</button>
+        </div>
         <div class="grid">
           <article>
             <h3>Window seat</h3>
-            <p>A sunny spot for a nap.</p>
+            <p>
+              Morning sun warms the sill. Look for the tabby here after
+              breakfast.
+            </p>
           </article>
           <article>
             <h3>Bookshelf</h3>
-            <p>A quiet corner to explore.</p>
+            <p>
+              A low shelf between the reading chair and the window makes a good
+              landing spot.
+            </p>
           </article>
         </div>
       </section>
@@ -47,7 +88,11 @@
         <form>
           <label
             >Observation
-            <input required name="observation" autocomplete="off" /></label
+            <input
+              required
+              name="observation"
+              autocomplete="off"
+              placeholder="What did the cat do?" /></label
           ><button>Save note</button>
         </form>
         <div class="panel" tabindex="0" aria-label="Scrollable field notes">

@@ -172,13 +172,13 @@ The executable plans are in [phase 1](phases/phase1.md), [phase 2](phases/phase2
 
 **Develop**
 
-- [ ] Implement a finite-state machine: idle, walk, prepare-jump, jump, fall, sleep and recover.
-- [ ] Build a navigation graph of platforms and feasible transitions: walking, jumping and controlled drops.
-- [ ] Calculate reachability using the same gravity, speed and jump parameters as the physics engine. Simulate candidate trajectories to identify intervening landings and safe landing intervals.
-- [ ] Start with local reachable-target selection; add A* for multi-platform routes once the graph is reliable. Use movement cost and optional novelty weighting.
-- [ ] Add randomized dwell times, exploration preferences, rest intervals and direction changes; avoid repetitive oscillation.
-- [ ] Replan when a destination disappears or changes, recover from failed jumps and enforce bounded retry attempts.
-- [ ] Separate navigation intent from physics execution; the controller must not teleport the pet to its target.
+- [x] Implement a finite-state machine: idle, walk, prepare-jump, jump, fall, sleep and recover.
+- [x] Build a navigation graph of platforms and feasible transitions: walking, jumping and controlled drops.
+- [x] Calculate reachability using the same gravity, speed and jump parameters as the physics engine. Simulate candidate trajectories to identify intervening landings and safe landing intervals.
+- [x] Start with local reachable-target selection; add A* for multi-platform routes once the graph is reliable. Use movement cost and optional novelty weighting.
+- [x] Add randomized dwell times, exploration preferences, rest intervals and direction changes; avoid repetitive oscillation.
+- [x] Replan when a destination disappears or changes, recover from failed jumps and enforce bounded retry attempts.
+- [x] Separate navigation intent from physics execution; the controller must not teleport the pet to its target.
 
 **Test**
 
@@ -195,13 +195,13 @@ The executable plans are in [phase 1](phases/phase1.md), [phase 2](phases/phase2
 
 **Develop**
 
-- [ ] Create or acquire an appropriately licensed pixel-art cat sprite sheet; record asset origin, terms and attribution.
-- [ ] Define animation frame ranges, frame durations, sprite anchors, visual scale and facing direction in character metadata.
-- [ ] Implement idle, walk, jump, fall, landing (if available) and sleep animation states.
-- [ ] Keep the collision shape independent of transparent sprite padding. Anchor feet to the platform surface.
-- [ ] Handle sprite loading failures gracefully, including a fallback visual.
-- [ ] Handle DPR changes and canvas resizing; use nearest-neighbour rendering for pixel art.
-- [ ] Bundle assets or use a reliably resolved package asset URL; avoid external runtime asset requests by default.
+- [x] Create or acquire an appropriately licensed pixel-art cat sprite sheet; record asset origin, terms and attribution.
+- [x] Define animation frame ranges, frame durations, sprite anchors, visual scale and facing direction in character metadata.
+- [x] Implement idle, walk, jump, fall, landing (if available) and sleep animation states.
+- [x] Keep the collision shape independent of transparent sprite padding. Anchor feet to the platform surface.
+- [x] Handle sprite loading failures gracefully, including a fallback visual.
+- [x] Handle DPR changes and canvas resizing; use nearest-neighbour rendering for pixel art.
+- [x] Bundle assets or use a reliably resolved package asset URL; avoid external runtime asset requests by default.
 
 **Test**
 
@@ -218,14 +218,14 @@ The executable plans are in [phase 1](phases/phase1.md), [phase 2](phases/phase2
 
 **Develop**
 
-- [ ] Integrate `MutationObserver` for relevant DOM and attribute changes, and `ResizeObserver` for tracked elements and layout roots.
-- [ ] Handle viewport resize, nested scroll events, orientation changes and SPA route changes. Provide explicit `refresh()` for layouts not captured by observers.
-- [ ] Coalesce invalidations into scheduled geometry updates; suppress observer feedback from the pet overlay.
-- [ ] Preserve support relationships when a platform moves; if it becomes hidden or removed, transition to falling/recovery. Revalidate navigation targets.
-- [ ] Handle sticky/fixed UI, virtualized lists, dialogs, collapsed panels, layout shifts and CSS transitions on a best-effort basis; use bounded refresh while active layout motion is detected.
-- [ ] Avoid rendering above modal dialogs by default (including native top-layer dialogs); pause or hide as appropriate. Support developer-defined exclusion zones.
-- [ ] Pause simulation and unnecessary geometry work while the document is hidden; refresh before resuming.
-- [ ] Document geometry limitations for CSS transforms, unusual stacking contexts and unsupported DOM boundaries.
+- [x] Integrate `MutationObserver` for relevant DOM and attribute changes, and `ResizeObserver` for tracked elements and layout roots.
+- [x] Handle viewport resize, nested scroll events, orientation changes and SPA route changes. Provide explicit `refresh()` for layouts not captured by observers.
+- [x] Coalesce invalidations into scheduled geometry updates; suppress observer feedback from the pet overlay.
+- [x] Preserve support relationships when a platform moves; if it becomes hidden or removed, transition to falling/recovery. Revalidate navigation targets.
+- [x] Handle sticky/fixed UI, virtualized lists, dialogs, collapsed panels, layout shifts and CSS transitions on a best-effort basis; use bounded refresh while active layout motion is detected.
+- [x] Avoid rendering above modal dialogs by default (including native top-layer dialogs); pause or hide as appropriate. Support developer-defined exclusion zones.
+- [x] Pause simulation and unnecessary geometry work while the document is hidden; refresh before resuming.
+- [x] Document geometry limitations for CSS transforms, unusual stacking contexts and unsupported DOM boundaries.
 
 **Test**
 
@@ -243,15 +243,15 @@ The executable plans are in [phase 1](phases/phase1.md), [phase 2](phases/phase2
 
 **Develop**
 
-- [ ] Finalize typed constructor options, sensible defaults, validation and documented public methods/events.
-- [ ] Support character, size, speed, gravity, include/exclude selectors, debug mode, rendering layer and reduced-motion preference.
-- [ ] Expose lifecycle and useful event subscriptions (state change, landing, error); subscriptions must return cleanup functions.
-- [ ] Keep start/pause/resume/destroy semantics idempotent; document single-active-instance MVP constraint and behaviour after destroy.
-- [ ] Respect `prefers-reduced-motion` by disabling autonomous animation by default when requested; respond to changes and expose pause/hide control for host applications.
-- [ ] Ensure overlay is non-focusable, `aria-hidden`, and `pointer-events: none`; never trap keyboard focus or intercept user input.
-- [ ] Create integration examples for vanilla JS, React with effect cleanup and SSR-safe initialization.
+- [x] Finalize typed constructor options, sensible defaults, validation and documented public methods/events.
+- [x] Support character, size, speed, gravity, include/exclude selectors, debug mode, rendering layer and reduced-motion preference.
+- [x] Expose lifecycle and useful event subscriptions (state change, landing, error); subscriptions must return cleanup functions.
+- [x] Keep start/pause/resume/destroy semantics idempotent; document single-active-instance MVP constraint and behaviour after destroy.
+- [x] Respect `prefers-reduced-motion` by disabling autonomous animation by default when requested; respond to changes and expose pause/hide control for host applications.
+- [x] Ensure overlay is non-focusable, `aria-hidden`, and `pointer-events: none`; never trap keyboard focus or intercept user input.
+- [x] Create integration examples for vanilla JS, React with effect cleanup and SSR-safe initialization.
 
-**Proposed API (subject to implementation refinement)**
+**Public API example**
 
 ```ts
 import { DOMPet } from 'dompet';
@@ -287,14 +287,14 @@ pet.destroy();
 
 **Develop**
 
-- [ ] Profile scanner, geometry refresh, physics, pathfinding and rendering independently.
-- [ ] Cache candidate geometry, bound candidate counts and pathfinding work, and use a simple spatial index if profiling justifies it.
-- [ ] Avoid quadratic graph construction on large pages by querying nearby candidate platforms.
-- [ ] Add debug counters for scan time, platform count, frame time, graph size and replans.
-- [ ] Add stress fixtures with 100, 1,000 and 5,000 DOM nodes, continuous mutations and nested scrolling.
-- [ ] Establish release benchmarks on a documented reference machine and browser.
-- [ ] Run long-lived and repeated lifecycle tests for leaks. Confirm no network calls, input-value collection or telemetry by default.
-- [ ] Configure CI to typecheck, lint, build, unit-test and run browser tests.
+- [x] Profile scanner, geometry refresh, physics, pathfinding and rendering independently.
+- [x] Cache candidate geometry, bound candidate counts and pathfinding work, and use a simple spatial index if profiling justifies it.
+- [x] Avoid quadratic graph construction on large pages by querying nearby candidate platforms.
+- [x] Add debug counters for scan time, platform count, frame time, graph size and replans.
+- [x] Add stress fixtures with 100, 1,000 and 5,000 DOM nodes, continuous mutations and nested scrolling.
+- [x] Establish release benchmarks on a documented reference machine and browser.
+- [x] Run long-lived and repeated lifecycle tests for leaks. Confirm no network calls, input-value collection or telemetry by default.
+- [x] Configure CI to typecheck, lint, build, unit-test and run browser tests.
 
 **Initial performance targets (verify and report, not guarantees)**
 
@@ -317,19 +317,21 @@ pet.destroy();
 
 **Acceptance:** CI passes, performance measurements are recorded, critical regressions are resolved and known limitations are documented.
 
+Local performance and regression checks passed. Hosted CI is pending. [Reference measurements](benchmarks/RESULTS.md)
+
 ### Phase 9 — Demo, documentation and release candidate
 
 **Goal:** Make the package understandable and ready for private consumers.
 
 **Develop**
 
-- [ ] Polish the demo into a realistic interactive mock website that naturally exposes different platform types.
-- [ ] Add demo controls for pause/resume, size, speed, layout changes and debug mode.
-- [ ] Write README covering installation, quick start, API, configuration, framework integration, accessibility, performance, troubleshooting and known limitations.
-- [ ] Add architecture notes, contribution/testing instructions, changelog and asset attribution.
-- [ ] Choose explicit private-use licensing/permissions; do not add a public open-source license unless intended.
-- [ ] Verify generated declarations, package exports and bundled assets. Restrict published contents using `files`.
-- [ ] Set initial release candidate version (e.g. `0.1.0-rc.1`).
+- [x] Polish the demo into a realistic interactive mock website that naturally exposes different platform types.
+- [x] Add demo controls for pause/resume, size, speed, layout changes and debug mode.
+- [x] Write README covering installation, quick start, API, configuration, framework integration, accessibility, performance, troubleshooting and known limitations.
+- [x] Add architecture notes, contribution/testing instructions, changelog and asset attribution.
+- [x] Choose explicit private-use licensing/permissions; do not add a public open-source license unless intended.
+- [x] Verify generated declarations, package exports and bundled assets. Restrict published contents using `files`.
+- [x] Set initial release candidate version (e.g. `0.1.0-rc.1`).
 
 **Test**
 
@@ -340,6 +342,8 @@ pet.destroy();
 - Follow README from scratch without relying on repository-only files.
 
 **Acceptance:** The package works outside its own repository, documentation matches implementation, and release candidate has no critical known defects.
+
+The private 0.1.0-rc.1 tarball and consumer verification are recorded in [phase 9](phases/phase9.md). All CI commands passed locally. Hosted CI remains pending.
 
 ### Phase 10 — Private GitHub package distribution
 

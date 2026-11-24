@@ -12,14 +12,14 @@ Begin after the acceptance checks in [phase 7](phase7.md) pass.
 
 **Develop**
 
-- [ ] Profile scanner, geometry refresh, physics, pathfinding and rendering independently.
-- [ ] Cache candidate geometry, bound candidate counts and pathfinding work, and use a simple spatial index if profiling justifies it.
-- [ ] Avoid quadratic graph construction on large pages by querying nearby candidate platforms.
-- [ ] Add debug counters for scan time, platform count, frame time, graph size and replans.
-- [ ] Add stress fixtures with 100, 1,000 and 5,000 DOM nodes, continuous mutations and nested scrolling.
-- [ ] Establish release benchmarks on a documented reference machine and browser.
-- [ ] Run long-lived and repeated lifecycle tests for leaks. Confirm no network calls, input-value collection or telemetry by default.
-- [ ] Configure CI to typecheck, lint, build, unit-test and run browser tests.
+- [x] Profile scanner, geometry refresh, physics, pathfinding and rendering independently.
+- [x] Cache candidate geometry, bound candidate counts and pathfinding work, and use a simple spatial index if profiling justifies it.
+- [x] Avoid quadratic graph construction on large pages by querying nearby candidate platforms.
+- [x] Add debug counters for scan time, platform count, frame time, graph size and replans.
+- [x] Add stress fixtures with 100, 1,000 and 5,000 DOM nodes, continuous mutations and nested scrolling.
+- [x] Establish release benchmarks on a documented reference machine and browser.
+- [x] Run long-lived and repeated lifecycle tests for leaks. Confirm no network calls, input-value collection or telemetry by default.
+- [x] Configure CI to typecheck, lint, build, unit-test and run browser tests.
 
 **Initial performance targets (verify and report, not guarantees)**
 
@@ -41,3 +41,5 @@ Begin after the acceptance checks in [phase 7](phase7.md) pass.
 - Check package bundle size and dependency tree.
 
 **Acceptance:** CI passes, performance measurements are recorded, critical regressions are resolved and known limitations are documented.
+
+Local verification passed with 16 unit tests, 50 browser tests, typecheck, lint, production build and a runtime dependency-tree check. See the [reference measurements](../benchmarks/RESULTS.md). Hosted GitHub Actions verification is pending upload of the workflow and implementation.

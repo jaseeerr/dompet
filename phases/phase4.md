@@ -12,13 +12,13 @@ Begin after the acceptance checks in [phase 3](phase3.md) pass.
 
 **Develop**
 
-- [ ] Implement a finite-state machine: idle, walk, prepare-jump, jump, fall, sleep and recover.
-- [ ] Build a navigation graph of platforms and feasible transitions: walking, jumping and controlled drops.
-- [ ] Calculate reachability using the same gravity, speed and jump parameters as the physics engine. Simulate candidate trajectories to identify intervening landings and safe landing intervals.
-- [ ] Start with local reachable-target selection; add A* for multi-platform routes once the graph is reliable. Use movement cost and optional novelty weighting.
-- [ ] Add randomized dwell times, exploration preferences, rest intervals and direction changes; avoid repetitive oscillation.
-- [ ] Replan when a destination disappears or changes, recover from failed jumps and enforce bounded retry attempts.
-- [ ] Separate navigation intent from physics execution; the controller must not teleport the pet to its target.
+- [x] Implement a finite-state machine: idle, walk, prepare-jump, jump, fall, sleep and recover.
+- [x] Build a navigation graph of platforms and feasible transitions: walking, jumping and controlled drops.
+- [x] Calculate reachability using the same gravity, speed and jump parameters as the physics engine. Simulate candidate trajectories to identify intervening landings and safe landing intervals.
+- [x] Start with local reachable-target selection; add A* for multi-platform routes once the graph is reliable. Use movement cost and optional novelty weighting.
+- [x] Add randomized dwell times, exploration preferences, rest intervals and direction changes; avoid repetitive oscillation.
+- [x] Replan when a destination disappears or changes, recover from failed jumps and enforce bounded retry attempts.
+- [x] Separate navigation intent from physics execution; the controller must not teleport the pet to its target.
 
 **Test**
 
@@ -28,3 +28,5 @@ Begin after the acceptance checks in [phase 3](phase3.md) pass.
 - Run a seeded multi-minute simulation and verify all positions remain finite and the pet continues exploring or resting appropriately.
 
 **Acceptance:** The pet independently traverses reachable parts of the demo and handles disconnected layouts without getting stuck in repeated failed actions.
+
+Verified with a three-minute deterministic replay, narrow and disconnected platform fixtures, a two-failure retry limit and a Chromium playground test that removes the scanned surfaces. Typecheck, lint, production build, Node import, 11 unit tests and six Chromium tests passed.

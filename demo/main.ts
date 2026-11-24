@@ -1,27 +1,44 @@
 /// <reference types="vite/client" />
 import { DOMPet } from "../src";
-const debug = new URLSearchParams(location.search).has("debug");
-const pet = new DOMPet({ debug });
-if (debug) {
-  document.querySelector<HTMLFieldSetElement>("#physics")!.hidden = false;
-  const bind = (id: string, handler: () => void) => {
-    document.querySelector<HTMLButtonElement>(id)!.onclick = handler;
-  };
-  bind("#left", () => pet.debugMove(-1));
-  bind("#right", () => pet.debugMove(1));
-  bind("#stop", () => pet.debugMove(0));
-  bind("#jump", () => pet.debugJump());
-  bind("#reset", () => pet.debugReset());
-  bind("#inspect", () => {
-    const state = pet.debugState;
-    if (state)
-      document.querySelector<HTMLOutputElement>("#motion")!.value =
-        `Feet (${state.x.toFixed(1)}, ${state.y.toFixed(1)}) · Velocity (${state.vx.toFixed(1)}, ${state.vy.toFixed(1)}) · Support ${state.support ?? "airborne"}`;
-  });
-}
-pet.start();
-const toggle = document.querySelector<HTMLButtonElement>("#toggle")!;
+import { drawRoom } from "./room";
+drawRoom(document.querySelector<HTMLCanvasElement>("#room")!);
+const debug = document.querySelector<HTMLInputElement>("#debug")!;
+const size = document.querySelector<HTMLSelectElement>("#size")!;
+const speed = document.querySelector<HTMLSelectElement>("#speed")!;
+debug.checked = new URLSearchParams(location.search).has("debug");
 let paused = false;
+let pet: DOMPet;
+function configure() {
+  pet?.destroy();
+  document.querySelector<HTMLFieldSetElement>("#physics")!.hidden =
+    !debug.checked;
+  document.querySelector<HTMLOutputElement>("#motion")!.value = "";
+  pet = new DOMPet({
+    debug: debug.checked,
+    size: Number(size.value),
+    speed: Number(speed.value),
+  });
+  pet.start();
+  if (paused) pet.pause();
+}
+configure();
+for (const control of [size, speed, debug]) control.onchange = configure;
+const bind = (id: string, handler: () => void) => {
+  document.querySelector<HTMLButtonElement>(id)!.onclick = handler;
+};
+bind("#left", () => pet.debugMove(-1));
+bind("#right", () => pet.debugMove(1));
+bind("#stop", () => pet.debugMove(0));
+bind("#explore", () => pet.debugExplore());
+bind("#jump", () => pet.debugJump());
+bind("#reset", () => pet.debugReset());
+bind("#inspect", () => {
+  const state = pet.debugState;
+  if (state)
+    document.querySelector<HTMLOutputElement>("#motion")!.value =
+      `Feet (${state.x.toFixed(1)}, ${state.y.toFixed(1)}) · Velocity (${state.vx.toFixed(1)}, ${state.vy.toFixed(1)}) · Support ${state.support ?? "airborne"} · Behaviour ${state.behaviour}`;
+});
+const toggle = document.querySelector<HTMLButtonElement>("#toggle")!;
 toggle.onclick = () => {
   paused = !paused;
   if (paused) pet.pause();
@@ -31,9 +48,12 @@ toggle.onclick = () => {
 const grid = document.querySelector(".grid")!;
 document.querySelector<HTMLButtonElement>("#add")!.onclick = () => {
   const card = document.createElement("article");
-  card.textContent = "Perch " + (grid.children.length + 1);
+  const title = document.createElement("h3");
+  title.textContent = "Perch " + (grid.children.length + 1);
+  const note = document.createElement("p");
+  note.textContent = "A new lookout for the next round of observations.";
+  card.append(title, note);
   grid.append(card);
-  pet.refresh();
 };
 const notes = document.querySelector("ul")!;
 function addNote(value: string) {
@@ -52,7 +72,9 @@ for (const note of [
   addNote(note);
 document.querySelector("form")!.onsubmit = (e) => {
   e.preventDefault();
-  const input = document.querySelector("input")!;
+  const input = document.querySelector<HTMLInputElement>(
+    "input[name=observation]",
+  )!;
   addNote(input.value);
   input.value = "";
 };

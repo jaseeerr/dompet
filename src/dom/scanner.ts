@@ -1,3 +1,5 @@
+import type { ScanOptions } from "../types.js";
+export type { ScanOptions } from "../types.js";
 import {
   subtract,
   type Interval,
@@ -5,14 +7,10 @@ import {
   type Snapshot,
 } from "../world/platform.js";
 
-export interface ScanOptions {
-  include?: string[];
-  exclude?: string[];
-  minPlatformWidth?: number;
-}
 const semantic =
   "button,input,textarea,select,fieldset,img,video,canvas,a[href]";
-const containers = "div,main,form,ul,ol,li,nav,section,article,header,footer,aside,figure";
+const containers =
+  "div,main,form,ul,ol,li,nav,section,article,header,footer,aside,figure";
 const excluded =
   "[data-dompet],[data-dompet-ignore],script,style,template,noscript,iframe,object,embed";
 const petWidth = 30;
@@ -31,20 +29,71 @@ function hasSurface(style: CSSStyleDeclaration) {
     style.boxShadow !== "none"
   );
 }
+// On very large documents sample the viewport first. Include nearby siblings so
+// short controls between sample rows can still contribute their top edge.
+function viewportCandidates(
+  doc: Document,
+  width: number,
+  height: number,
+  selector: string,
+) {
+  const found = new Set<Element>();
+  const cols = Math.max(1, Math.min(12, Math.ceil(width / 150)));
+  const rows = Math.max(1, Math.min(10, Math.ceil(height / 90)));
+  function add(el: Element | null) {
+    if (el && found.size < 256 && el.matches(selector)) found.add(el);
+  }
+  for (let row = 0; row < rows; row++)
+    for (let col = 0; col < cols; col++) {
+      let el = doc.elementFromPoint(
+        ((col + 0.5) * width) / cols,
+        ((row + 0.5) * height) / rows,
+      );
+      while (el && el !== doc.body && el !== doc.documentElement) {
+        add(el);
+        add(el.previousElementSibling);
+        add(el.nextElementSibling);
+        el = el.parentElement;
+      }
+    }
+  return [...found].sort((a, b) =>
+    a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1,
+  );
+}
 export class Scanner {
   private ids = new WeakMap<Element, string>();
   private next = 1;
   private minimum: number;
   private include: string;
   private exclude: string;
+  private zoneSelector: string;
+  zones: DOMRect[] = [];
+  roots = new Set<Element>();
   constructor(options: ScanOptions) {
     this.minimum = options.minPlatformWidth ?? petWidth / 2;
     if (!Number.isFinite(this.minimum) || this.minimum <= 0)
       throw new RangeError("minPlatformWidth must be positive and finite");
     this.include = (options.include ?? []).join(",");
-    this.exclude = [excluded, ...(options.exclude ?? [])].join(",");
+    this.zoneSelector = (options.exclusionZones ?? []).join(",");
+    this.exclude = [
+      excluded,
+      ...(options.exclude ?? []),
+      ...(options.exclusionZones ?? []),
+    ].join(",");
   }
   scan(doc: Document): Snapshot {
+    this.roots = new Set([doc.documentElement, doc.body]);
+    this.zones = this.zoneSelector
+      ? Array.from(doc.querySelectorAll(this.zoneSelector)).flatMap((el) => {
+          this.roots.add(el);
+          const r = el.getBoundingClientRect();
+          return r.width &&
+            r.height &&
+            getComputedStyle(el).visibility === "visible"
+            ? [r]
+            : [];
+        })
+      : [];
     const view = doc.defaultView!;
     const width = doc.documentElement.clientWidth,
       height = doc.documentElement.clientHeight;
@@ -64,16 +113,46 @@ export class Scanner {
     };
     // Validate exclusions even on an empty page.
     doc.documentElement.matches(this.exclude);
-    const candidates = doc.body.querySelectorAll(
-      [semantic, containers, this.include].filter(Boolean).join(","),
-    );
+    const selector = [semantic, containers, this.include]
+      .filter(Boolean)
+      .join(",");
+    const all = doc.body.querySelectorAll(selector);
+    const candidates =
+      all.length > 2048
+        ? viewportCandidates(doc, width, height, selector)
+        : all;
+    const rects = new Map<Element, DOMRect>();
+    function rectOf(el: Element) {
+      let r = rects.get(el);
+      if (!r) {
+        r = el.getBoundingClientRect();
+        rects.set(el, r);
+      }
+      return r;
+    }
+    if (candidates.length < all.length)
+      rejected["outside shortlist"] = all.length - candidates.length;
     for (const el of Array.from(candidates)) {
+      const rect = rectOf(el);
+      if (
+        rect.bottom <= 0 ||
+        rect.top >= height ||
+        rect.right <= 0 ||
+        rect.left >= width
+      ) {
+        reject("offscreen");
+        continue;
+      }
+      if (platforms.length >= 128) {
+        reject("platform limit");
+        continue;
+      }
       if (el.closest(this.exclude)) {
         reject("excluded");
         continue;
       }
       const style = styleOf(el);
-      const rect = el.getBoundingClientRect();
+
       if (
         !el.isConnected ||
         !rect.height ||
@@ -116,7 +195,8 @@ export class Scanner {
         if (node === el || node === doc.documentElement) continue;
         if (css.overflowX === "visible" && css.overflowY === "visible")
           continue;
-        const bounds = node.getBoundingClientRect();
+        this.roots.add(node);
+        const bounds = rectOf(node);
         if (css.overflowY !== "visible") {
           const top = bounds.top + node.clientTop;
           if (y < top || sampleY >= top + node.clientHeight) {
@@ -139,8 +219,9 @@ export class Scanner {
         continue;
       }
       let intervals: Interval[] = [];
-      const samples = Math.ceil(
-        (right - left) / Math.max(1, Math.min(8, this.minimum)),
+      const samples = Math.min(
+        all.length > 256 ? 3 : 64,
+        Math.ceil((right - left) / Math.max(1, Math.min(8, this.minimum))),
       );
       const step = (right - left) / samples;
       let run: number | undefined;
@@ -158,6 +239,9 @@ export class Scanner {
         reject("occluded");
         continue;
       }
+      for (const zone of this.zones)
+        if (y >= zone.top && y < zone.bottom)
+          intervals = subtract(intervals, [zone.left, zone.right]);
       for (const other of platforms) {
         if (Math.abs(other.y - y) <= 1)
           for (const interval of other.intervals)
@@ -178,6 +262,7 @@ export class Scanner {
         y,
         left: intervals[0][0],
         right: intervals[intervals.length - 1][1],
+        originX: rect.left,
         source: el,
         intervals,
       });
@@ -190,6 +275,6 @@ export class Scanner {
       right: width,
       intervals: [[0, width]],
     });
-    return { platforms, candidates: candidates.length, rejected };
+    return { platforms, candidates: all.length, rejected };
   }
 }

@@ -1,5 +1,10 @@
 import type { Snapshot } from "../world/platform.js";
-export function drawPlatforms(ctx: CanvasRenderingContext2D, world: Snapshot) {
+import type { DOMPetMetrics } from "../index.js";
+export function drawPlatforms(
+  ctx: CanvasRenderingContext2D,
+  world: Snapshot,
+  m: DOMPetMetrics,
+) {
   ctx.save();
   ctx.font = "12px monospace";
   ctx.lineWidth = 2;
@@ -19,6 +24,8 @@ export function drawPlatforms(ctx: CanvasRenderingContext2D, world: Snapshot) {
       " candidates · " +
       world.platforms.length +
       " platforms (incl. floor)",
+    `scan ${m.scanMs.toFixed(1)} ms · frame ${m.frameMs.toFixed(1)} ms`,
+    `graph ${m.graphNodes} nodes / ${m.graphEdges} edges · ${m.replans} plans`,
     ...Object.entries(world.rejected).map(([reason, n]) => reason + " " + n),
   ];
   const width = Math.max(...lines.map((s) => ctx.measureText(s).width)) + 12;

@@ -4,6 +4,7 @@ export interface Platform {
   left: number;
   right: number;
   y: number;
+  originX?: number;
   source: Element | null;
   intervals: Interval[];
 }

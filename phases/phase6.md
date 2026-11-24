@@ -12,14 +12,14 @@ Begin after the acceptance checks in [phase 5](phase5.md) pass.
 
 **Develop**
 
-- [ ] Integrate `MutationObserver` for relevant DOM and attribute changes, and `ResizeObserver` for tracked elements and layout roots.
-- [ ] Handle viewport resize, nested scroll events, orientation changes and SPA route changes. Provide explicit `refresh()` for layouts not captured by observers.
-- [ ] Coalesce invalidations into scheduled geometry updates; suppress observer feedback from the pet overlay.
-- [ ] Preserve support relationships when a platform moves; if it becomes hidden or removed, transition to falling/recovery. Revalidate navigation targets.
-- [ ] Handle sticky/fixed UI, virtualized lists, dialogs, collapsed panels, layout shifts and CSS transitions on a best-effort basis; use bounded refresh while active layout motion is detected.
-- [ ] Avoid rendering above modal dialogs by default (including native top-layer dialogs); pause or hide as appropriate. Support developer-defined exclusion zones.
-- [ ] Pause simulation and unnecessary geometry work while the document is hidden; refresh before resuming.
-- [ ] Document geometry limitations for CSS transforms, unusual stacking contexts and unsupported DOM boundaries.
+- [x] Integrate `MutationObserver` for relevant DOM and attribute changes, and `ResizeObserver` for tracked elements and layout roots.
+- [x] Handle viewport resize, nested scroll events, orientation changes and SPA route changes. Provide explicit `refresh()` for layouts not captured by observers.
+- [x] Coalesce invalidations into scheduled geometry updates; suppress observer feedback from the pet overlay.
+- [x] Preserve support relationships when a platform moves; if it becomes hidden or removed, transition to falling/recovery. Revalidate navigation targets.
+- [x] Handle sticky/fixed UI, virtualized lists, dialogs, collapsed panels, layout shifts and CSS transitions on a best-effort basis; use bounded refresh while active layout motion is detected.
+- [x] Avoid rendering above modal dialogs by default (including native top-layer dialogs); pause or hide as appropriate. Support developer-defined exclusion zones.
+- [x] Pause simulation and unnecessary geometry work while the document is hidden; refresh before resuming.
+- [x] Document geometry limitations for CSS transforms, unusual stacking contexts and unsupported DOM boundaries.
 
 **Test**
 
@@ -30,3 +30,5 @@ Begin after the acceptance checks in [phase 5](phase5.md) pass.
 - Test desktop and mobile viewport sizes in Chromium, Firefox and WebKit.
 
 **Acceptance:** The pet remains synchronized with normal dynamic layouts and recovers gracefully when the environment changes.
+
+Verified with typecheck, lint, the production build, a Node import, 13 unit tests and 28 browser tests. The dynamic layout fixtures passed in Chromium, Firefox and WebKit at desktop and mobile viewport sizes.

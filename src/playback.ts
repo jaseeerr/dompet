@@ -14,13 +14,18 @@ export function playback(
   let previous: number | undefined;
   let phase = random() * Math.PI * 2;
   let accumulator = 0;
+  let generation = 0;
   function tick(time: number) {
+    const run = generation;
     const elapsed =
       previous === undefined ? 0 : Math.min(100, Math.max(0, time - previous));
     phase += Math.min(50, elapsed) / 350;
     accumulator += elapsed / 1000;
     const steps = Math.min(8, Math.floor((accumulator + 1e-12) / stepSeconds));
-    for (let i = 0; i < steps; i++) update?.();
+    for (let i = 0; i < steps; i++) {
+      update?.();
+      if (run !== generation) return;
+    }
     accumulator = Math.max(0, accumulator - steps * stepSeconds) % stepSeconds;
     previous = time;
     draw(phase);
@@ -38,6 +43,7 @@ export function playback(
       accumulator = 0;
     },
     pause() {
+      generation++;
       if (frame !== undefined) clock.cancel(frame);
       frame = undefined;
       previous = undefined;

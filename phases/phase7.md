@@ -12,15 +12,15 @@ Begin after the acceptance checks in [phase 6](phase6.md) pass.
 
 **Develop**
 
-- [ ] Finalize typed constructor options, sensible defaults, validation and documented public methods/events.
-- [ ] Support character, size, speed, gravity, include/exclude selectors, debug mode, rendering layer and reduced-motion preference.
-- [ ] Expose lifecycle and useful event subscriptions (state change, landing, error); subscriptions must return cleanup functions.
-- [ ] Keep start/pause/resume/destroy semantics idempotent; document single-active-instance MVP constraint and behaviour after destroy.
-- [ ] Respect `prefers-reduced-motion` by disabling autonomous animation by default when requested; respond to changes and expose pause/hide control for host applications.
-- [ ] Ensure overlay is non-focusable, `aria-hidden`, and `pointer-events: none`; never trap keyboard focus or intercept user input.
-- [ ] Create integration examples for vanilla JS, React with effect cleanup and SSR-safe initialization.
+- [x] Finalize typed constructor options, sensible defaults, validation and documented public methods/events.
+- [x] Support character, size, speed, gravity, include/exclude selectors, debug mode, rendering layer and reduced-motion preference.
+- [x] Expose lifecycle and useful event subscriptions (state change, landing, error); subscriptions must return cleanup functions.
+- [x] Keep start/pause/resume/destroy semantics idempotent; document single-active-instance MVP constraint and behaviour after destroy.
+- [x] Respect `prefers-reduced-motion` by disabling autonomous animation by default when requested; respond to changes and expose pause/hide control for host applications.
+- [x] Ensure overlay is non-focusable, `aria-hidden`, and `pointer-events: none`; never trap keyboard focus or intercept user input.
+- [x] Create integration examples for vanilla JS, React with effect cleanup and SSR-safe initialization.
 
-**Proposed API (subject to implementation refinement)**
+**Public API example**
 
 ```ts
 import { DOMPet } from 'dompet';
@@ -49,3 +49,5 @@ pet.destroy();
 - React mount/unmount including Strict Mode and SSR import.
 
 **Acceptance:** A developer can install and initialize the package using a few lines, and the host application remains fully usable with the pet enabled.
+
+Verified with typecheck, lint, production build, 16 unit tests and 32 browser tests. The packed library installed into a clean consumer, imported in Node and passed a strict TypeScript consumer check. The React example rendered on the server and mounted, unmounted and remounted under Strict Mode.

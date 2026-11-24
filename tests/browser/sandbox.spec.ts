@@ -76,3 +76,19 @@ test("repeated lifecycle calls release canvas, frame and listener", async ({
     }
   });
 });
+
+test("journal settings preserve pause and replace a single overlay", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Pause pet" }).click();
+  await page.getByLabel("Cat size").selectOption("48");
+  await page.getByLabel("Walking speed").selectOption("1.6");
+  await page.getByLabel("Debug platforms").check();
+  await expect(page.locator("[data-dompet]")).toHaveCount(1);
+  await expect(page.getByRole("button", { name: "Resume pet" })).toBeVisible();
+  await page.getByRole("button", { name: "Inspect physics" }).click();
+  await expect(page.locator("#motion")).toContainText("22.0");
+  await page.getByLabel("Debug platforms").uncheck();
+  await expect(page.locator("#physics")).toBeHidden();
+});

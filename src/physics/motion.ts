@@ -1,3 +1,5 @@
+import type { Body } from "../types.js";
+export type { Body } from "../types.js";
 import type { Platform } from "../world/platform.js";
 
 export const stepSeconds = 1 / 120;
@@ -9,13 +11,6 @@ export const motion = {
   jumpSpeed: 480,
   terminalSpeed: 800,
 };
-export interface Body {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  support: string | null;
-}
 export interface Bounds {
   width: number;
   height: number;
@@ -37,7 +32,7 @@ export function spawn(bounds: Bounds): Body {
     support: null,
   };
 }
-function supports(platform: Platform, x: number, width: number) {
+export function supports(platform: Platform, x: number, width: number) {
   const half = Math.min(motion.width, width) / 2;
   return platform.intervals.some(
     ([left, right]) =>
@@ -52,6 +47,7 @@ export function step(
   intent: Intent,
   platforms: Platform[],
   bounds: Bounds,
+  settings = motion,
 ): Body {
   const { width, height } = bounds;
   if (
@@ -70,11 +66,11 @@ export function step(
   )
     return spawn(bounds);
   const half = Math.min(width, motion.width) / 2;
-  const targetX = body.x + intent.direction * motion.speed * stepSeconds;
+  const targetX = body.x + intent.direction * settings.speed * stepSeconds;
   const clampX = (value: number) =>
     Math.max(half, Math.min(width - half, value));
   const x = clampX(targetX);
-  const vx = x === targetX ? intent.direction * motion.speed : 0;
+  const vx = x === targetX ? intent.direction * settings.speed : 0;
   const standing = platforms.find(
     (p) =>
       p.id === body.support && p.y === body.y && supports(p, body.x, width),
@@ -84,7 +80,7 @@ export function step(
   const initialVy = standing && intent.jump ? -motion.jumpSpeed : body.vy;
   let vy = Math.min(
     motion.terminalSpeed,
-    initialVy + motion.gravity * stepSeconds,
+    initialVy + settings.gravity * stepSeconds,
   );
   let y = body.y + vy * stepSeconds;
   let landing: Platform | undefined;
