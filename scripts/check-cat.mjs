@@ -7,7 +7,14 @@ const bytes = await readFile(
   new URL("../src/characters/tabby.glb", import.meta.url),
 );
 const gltf = JSON.parse(bytes.subarray(20, 20 + bytes.readUInt32LE(12)));
-assert.equal(gltf.skins.length, 6);
+assert.equal(
+  gltf.images[
+    gltf.textures[gltf.materials[0].pbrMetallicRoughness.baseColorTexture.index]
+      .source
+  ].mimeType,
+  "image/png",
+);
+assert.equal(gltf.skins.length, 1);
 assert.equal(new Set(gltf.animations.map((a) => a.name)).size, 8);
 const rig = buildCat(),
   cat = new Group(),
@@ -67,7 +74,7 @@ for (const node of gltf.nodes) {
 }
 assert(drift <= 2, "Stance drift " + drift);
 console.log(
-  "Four contacts, six skins, eight clips. Maximum planted error " +
+  "Four contacts, one textured skin, eight clips. Maximum planted error " +
     drift.toFixed(3) +
     " CSS px.",
 );

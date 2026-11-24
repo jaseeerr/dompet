@@ -26,7 +26,11 @@ export async function scene(host, lost, signal) {
   const disposeAsset = () => {
     skeletons.forEach((s) => s.dispose());
     geometries.forEach((g) => g.dispose());
-    materials.forEach((m) => m.dispose());
+    materials.forEach((m) => {
+      m.map?.source.data?.close?.();
+      m.map?.dispose();
+      m.dispose();
+    });
   };
   if (signal.aborted) {
     disposeAsset();

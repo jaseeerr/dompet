@@ -24299,7 +24299,9 @@ async function mp(r, e, t) {
     b.skeleton && l.add(b.skeleton), b.isMesh && (a.add(b.geometry), o.add(b.material));
   });
   const c = () => {
-    l.forEach((b) => b.dispose()), a.forEach((b) => b.dispose()), o.forEach((b) => b.dispose());
+    l.forEach((b) => b.dispose()), a.forEach((b) => b.dispose()), o.forEach((b) => {
+      b.map?.source.data?.close?.(), b.map?.dispose(), b.dispose();
+    });
   };
   if (t.aborted)
     throw c(), new Error("Disposed");

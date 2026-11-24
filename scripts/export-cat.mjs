@@ -1,5 +1,6 @@
 import { pose as animate, standingWidth } from "../src/rendering/pose.js";
 import { AnimationClip, Group, VectorKeyframeTrack } from "three";
+import { bindTabby, embedCoat } from "./skin-tabby.mjs";
 import { writeFile } from "node:fs/promises";
 import { GLTFExporter } from "three/addons/exporters/GLTFExporter.js";
 import { buildCat } from "../src/characters/model.js";
@@ -12,6 +13,7 @@ globalThis.FileReader = class {
   }
 };
 const rig = buildCat();
+const coat = await bindTabby(rig);
 const joints = [
   rig.spine,
   rig.chest,
@@ -120,6 +122,6 @@ const bytes = await new GLTFExporter().parseAsync(rig.root, {
 });
 await writeFile(
   new URL("../src/characters/tabby.glb", import.meta.url),
-  new Uint8Array(bytes),
+  embedCoat(bytes, coat),
 );
 rig.dispose();

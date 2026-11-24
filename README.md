@@ -6,10 +6,10 @@ A framework-independent browser pet. An animated orange tabby walks, jumps and n
 With read access to `jaseeerr/dompet` and GitHub SSH authentication configured, install the V1 candidate from your application directory:
 
 ```sh
-npm install 'git+ssh://git@github.com/jaseeerr/dompet.git#main'
+npm install 'git+ssh://git@github.com/jaseeerr/dompet.git#v1.0.0-rc.2'
 ```
 
-For an immutable pin, replace `main` with the full commit SHA returned by `git ls-remote git@github.com:jaseeerr/dompet.git refs/heads/main`. Commit your application's lockfile and use `npm ci` in subsequent builds. The repository tracks the compiled ESM library, declarations and self-hosted character assets. Installing with `--ignore-scripts` is supported.
+For an immutable pin, replace `v1.0.0-rc.2` with the full commit SHA returned by `git ls-remote git@github.com:jaseeerr/dompet.git refs/heads/main`. Commit your application's lockfile and use `npm ci` in subsequent builds. The repository tracks the compiled ESM library, declarations and self-hosted character assets. Installing with `--ignore-scripts` is supported.
 
 For a private CI consumer, grant its deploy key read-only access and load the private key from the CI secret store. Use verified GitHub host keys. An approved read-only machine credential can also authenticate Git through a credential helper. Keep credentials out of dependency URLs, lockfiles and logs.
 
@@ -104,7 +104,7 @@ A refresh that changes the platform geometry or viewport invalidates the current
 
 DOMPet loads Three.js and its rigged tabby on demand. The four-legged walk, takeoff, landing, blink and sleep poses share the simulation clock. The support footprint is 43% of the resolved size. To retain the prototype appearance, use `new DOMPet({renderer:"sprite", size:32})`.
 
-For direct ESM deployment, copy the entire `dist/` directory under your site path and import its `index.js`. Keep `chunks/` and `assets/` beside it. Allow same-origin scripts and model fetches in CSP and permit `data:` images for the embedded fallback. A failed import, model request or WebGL context switches to the sprite at the current feet. Inspect `[data-dompet]` and its `data-renderer` attribute for loading, webgl or sprite. Vite consumers can import the package by name. [Art provenance](src/characters/ART.md)
+For direct ESM deployment, copy the entire `dist/` directory under your site path and import its `index.js`. Keep `chunks/` and `assets/` beside it. Allow same-origin scripts and model fetches in CSP and permit `data:` images for the embedded fallback. A failed import, model request or WebGL context switches to a 2D rendering of the same textured cat at the current feet. Inspect `[data-dompet]` and its `data-renderer` attribute for loading, webgl or sprite. Vite consumers can import the package by name. [Art provenance](src/characters/ART.md)
 
 ## Dynamic layouts
 

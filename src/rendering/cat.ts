@@ -1,3 +1,4 @@
+import texturedSheet from "../characters/tabby-fallback.webp?inline";
 import sheet from "../characters/tabby.png?inline";
 import { tabby, type Clip } from "../characters/tabby.js";
 import type { Body } from "../physics/motion.js";
@@ -66,13 +67,18 @@ export class Animation {
   }
 }
 
-export function loadCat(redraw: () => void, failed: () => void) {
+export function loadCat(
+  redraw: () => void,
+  failed: () => void,
+  textured = false,
+) {
+  const frameScale = textured ? 6 : 1;
   const image = new Image();
   let ready = false;
   image.onload = () => {
     ready =
-      image.naturalWidth === 15 * tabby.width &&
-      image.naturalHeight === tabby.height;
+      image.naturalWidth === 15 * tabby.width * frameScale &&
+      image.naturalHeight === tabby.height * frameScale;
     redraw();
     if (!ready) failed();
   };
@@ -81,7 +87,7 @@ export function loadCat(redraw: () => void, failed: () => void) {
     redraw();
     failed();
   };
-  image.src = sheet;
+  image.src = textured ? texturedSheet : sheet;
   return {
     draw(
       ctx: CanvasRenderingContext2D,
@@ -97,14 +103,14 @@ export function loadCat(redraw: () => void, failed: () => void) {
         Math.round(body.y * dpr) / dpr,
       );
       ctx.scale(animation.facing * scale, scale);
-      ctx.imageSmoothingEnabled = false;
+      ctx.imageSmoothingEnabled = textured;
       if (ready) {
         ctx.drawImage(
           image,
-          animation.frame * tabby.width,
+          animation.frame * tabby.width * frameScale,
           0,
-          tabby.width,
-          tabby.height,
+          tabby.width * frameScale,
+          tabby.height * frameScale,
           -tabby.anchorX,
           -tabby.anchorY,
           tabby.width,

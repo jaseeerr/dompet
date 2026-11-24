@@ -269,11 +269,14 @@ export class DOMPet {
     let body = spawn({ width: host.clientWidth, height: host.clientHeight });
     let graph: Graph;
     let explorer: Explorer;
-    const sprite = loadCat(draw, () =>
-      this.#emit(
-        "error",
-        new Error("Cat sprite unavailable; drawing fallback"),
-      ),
+    const sprite = loadCat(
+      draw,
+      () =>
+        this.#emit(
+          "error",
+          new Error("Cat sprite unavailable; drawing fallback"),
+        ),
+      this.#renderer !== "sprite",
     );
     const assetController = new AbortController();
     let model:

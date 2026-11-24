@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0-rc.2
+
+Replaces the procedural cat with the supplied textured orange tabby, rigged for the existing movement system. Automatic fallback draws poses rendered from the same coat. Set `renderer: "sprite"` for the original pixel art.
+
 ## 1.0.0-rc.1
 
 Adds a locally hosted Three.js tabby with six skins, eight portable animation clips, responsive sizing, footprint-aware navigation and context-loss recovery. The journal includes a rig inspector and renderer selection.
