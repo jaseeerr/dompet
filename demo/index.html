@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DOMPet playground</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <nav>
+      <strong>DOMPet</strong><a href="#habitat">Habitat</a
+      ><a href="#notes">Field notes</a>
+    </nav>
+    <main>
+      <header>
+        <h1>Pet playground</h1>
+        <p>Watch the cat land on the page. Open debug mode to move it.</p>
+        <a href="?debug">Debug platforms</a>
+        <button id="refresh">Refresh surfaces</button>
+        <button id="toggle">Pause pet</button>
+        <fieldset id="physics" hidden data-dompet-ignore>
+          <legend>Physics controls</legend>
+          <button id="left">Walk left</button
+          ><button id="stop">Stop walking</button
+          ><button id="right">Walk right</button> <button id="jump">Jump</button
+          ><button id="reset">Reset pet</button
+          ><button id="inspect">Inspect physics</button>
+          <output id="motion"></output>
+        </fieldset>
+      </header>
+      <section id="habitat">
+        <h2>Habitat</h2>
+        <button id="add">Add a perch</button>
+        <div class="grid">
+          <article>
+            <h3>Window seat</h3>
+            <p>A sunny spot for a nap.</p>
+          </article>
+          <article>
+            <h3>Bookshelf</h3>
+            <p>A quiet corner to explore.</p>
+          </article>
+        </div>
+      </section>
+      <section id="notes">
+        <h2>Field notes</h2>
+        <form>
+          <label
+            >Observation
+            <input required name="observation" autocomplete="off" /></label
+          ><button>Save note</button>
+        </form>
+        <div class="panel" tabindex="0" aria-label="Scrollable field notes">
+          <ul></ul>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

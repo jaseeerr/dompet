@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+  <title>Platform scanner fixture</title>
+  <style>
+    body {
+      margin: 0;
+    }
+    #grid {
+      display: grid;
+      grid-template-columns: 200px 200px;
+      gap: 20px;
+      margin: 30px;
+    }
+    #card {
+      background: #ccc;
+      height: 50px;
+    }
+    #flex {
+      display: flex;
+      gap: 10px;
+    }
+    #clip {
+      position: absolute;
+      top: 140px;
+      left: 20px;
+      width: 100px;
+      height: 60px;
+      overflow: hidden;
+    }
+    #wide {
+      position: absolute;
+      top: 8px;
+      width: 180px;
+      height: 20px;
+      background: salmon;
+    }
+    #cut {
+      position: absolute;
+      top: -5px;
+      width: 80px;
+      height: 10px;
+      background: blue;
+    }
+    #ledge {
+      position: absolute;
+      left: 20px;
+      top: 250px;
+      width: 200px;
+      height: 20px;
+      background: black;
+    }
+    #cover {
+      position: absolute;
+      left: 100px;
+      top: 242px;
+      width: 40px;
+      height: 30px;
+      background: white;
+    }
+    #nested {
+      position: absolute;
+      top: 320px;
+      left: 20px;
+      width: 150px;
+      height: 40px;
+      background: #ccc;
+    }
+    #same {
+      margin-top: 1px;
+      background: #999;
+      height: 20px;
+    }
+    #custom {
+      display: block;
+      margin-top: 350px;
+      width: 60px;
+      height: 12px;
+    }
+    #page {
+      position: fixed;
+      inset: 0;
+      background: white;
+      z-index: -1;
+    }
+  </style>
+  <body>
+    <div id="page"></div>
+    <div id="grid">
+      <div id="card"></div>
+      <div id="flex">
+        <button id="button">Button</button><input id="input" size="4" />
+      </div>
+    </div>
+    <div id="clip">
+      <div id="wide"></div>
+      <div id="cut"></div>
+    </div>
+    <div id="ledge"></div>
+    <div id="cover" data-dompet-ignore></div>
+    <div id="nested"><div id="same"></div></div>
+    <span id="custom"></span>
+    <div class="skip"><button>Excluded</button></div>
+    <div style="opacity: 0"><button>Invisible</button></div>
+    <button hidden>Hidden</button>
+    <div data-dompet><button>Overlay</button></div>
+  </body>
+</html>

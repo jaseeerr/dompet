@@ -1,0 +1,86 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: #faf7ef;
+  color: #283d34;
+  font:
+    1rem/1.55 "DM Sans",
+    system-ui,
+    sans-serif;
+}
+nav,
+main {
+  max-width: 64rem;
+  margin: auto;
+  padding: 1.5rem;
+}
+nav {
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+  border-bottom: 1px solid #bbc7b8;
+}
+nav strong {
+  margin-right: auto;
+}
+a {
+  color: inherit;
+}
+header {
+  padding: 3rem 0;
+}
+h1 {
+  font:
+    clamp(3rem, 8vw, 6rem)/1 Georgia,
+    serif;
+  margin: 0.3em 0;
+}
+section {
+  margin-bottom: 3rem;
+}
+button,
+input {
+  font: inherit;
+  border: 1px solid #567160;
+  border-radius: 0.5rem;
+  padding: 0.45rem 0.8rem;
+}
+button {
+  background: #284e40;
+  color: white;
+  cursor: pointer;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+article,
+.panel {
+  background: #e7ecdd;
+  border-radius: 1rem;
+  padding: 1rem 1.4rem;
+}
+article h3 {
+  margin: 0;
+}
+.panel {
+  max-height: 7rem;
+  overflow: auto;
+  margin: 1rem 0;
+}
+ul {
+  margin: 0;
+}
+li {
+  padding: 0.3rem;
+}
+
+#motion {
+  display: block;
+  min-height: 1.55em;
+  font-variant-numeric: tabular-nums;
+}
