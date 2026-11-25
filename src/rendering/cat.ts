@@ -1,4 +1,4 @@
-import spiderSheet from "../characters/spiderman-fallback.webp?url";
+import spiderSheet from "../characters/spiderman-fallback.webp?inline";
 import type { DOMPetOptions } from "../index.js";
 import humanSheet from "../characters/human-fallback.webp?inline";
 import texturedSheet from "../characters/tabby-fallback.webp?inline";
@@ -98,10 +98,7 @@ export function loadCat(
   if (spider) {
     // A synchronous start/destroy pair should never begin an asset fetch.
     queueMicrotask(() => {
-      if (image.onload)
-        image.src = import.meta.env.DEV
-          ? spiderSheet
-          : new URL("./assets/spiderman-fallback.webp", import.meta.url).href;
+      if (image.onload) image.src = spiderSheet;
     });
   } else image.src = human ? humanSheet : textured ? texturedSheet : sheet;
   return {

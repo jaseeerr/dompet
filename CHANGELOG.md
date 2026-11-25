@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0-rc.6
+
+The packaged renderer embeds the Spider-Man model and sprite so bundlers can relocate the JavaScript without breaking either asset URL.
+
 ## 1.0.0-rc.5
 
 Humanoid walking speed follows standing height and the authored stride. Reversals and landings hold ground position for the full clip. Airborne limbs respond to vertical velocity. Spider-Man’s 2D renderer now includes 24 walk frames, a stepping turn and landing recovery.

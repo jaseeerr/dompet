@@ -41,8 +41,7 @@ export async function scene(host, lost, signal, character) {
   const urls = import.meta.env.DEV
     ? { spiderman: spiderAsset, human: humanAsset, cat: devAsset }
     : {
-        spiderman: new URL("../assets/dompet-spiderman.glb", import.meta.url)
-          .href,
+        spiderman: spiderAsset,
         human: new URL("../assets/dompet-human.glb", import.meta.url).href,
         cat: new URL("../assets/tabby.glb", import.meta.url).href,
       };

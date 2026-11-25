@@ -6,10 +6,10 @@ A framework-independent browser pet. Spider-Man walks, turns and jumps on visibl
 With read access to `jaseeerr/dompet` and GitHub SSH authentication configured, install the V1 candidate from your application directory:
 
 ```sh
-npm install 'git+ssh://git@github.com/jaseeerr/dompet.git#v1.0.0-rc.5'
+npm install 'git+ssh://git@github.com/jaseeerr/dompet.git#v1.0.0-rc.6'
 ```
 
-For an immutable pin, replace `v1.0.0-rc.5` with the full commit SHA returned by `git ls-remote git@github.com:jaseeerr/dompet.git refs/tags/v1.0.0-rc.5`. Commit your application's lockfile and use `npm ci` in subsequent builds. The repository tracks the compiled ESM library, declarations and self-hosted character assets. Installing with `--ignore-scripts` is supported.
+For an immutable pin, replace `v1.0.0-rc.6` with the full commit SHA returned by `git ls-remote git@github.com:jaseeerr/dompet.git refs/tags/v1.0.0-rc.6`. Commit your application's lockfile and use `npm ci` in subsequent builds. The repository tracks the compiled ESM library, declarations and self-hosted character assets. Installing with `--ignore-scripts` is supported.
 
 For a private CI consumer, grant its deploy key read-only access and load the private key from the CI secret store. Use verified GitHub host keys. An approved read-only machine credential can also authenticate Git through a credential helper. Keep credentials out of dependency URLs, lockfiles and logs.
 
