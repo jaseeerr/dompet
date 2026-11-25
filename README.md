@@ -1,15 +1,15 @@
 # DOMPet
-A framework-independent browser pet. A stylized human or an orange tabby walks and jumps on visible page surfaces.
+A framework-independent browser pet. Spider-Man walks, turns and jumps on visible page surfaces.
 
 ## Install the private release
 
 With read access to `jaseeerr/dompet` and GitHub SSH authentication configured, install the V1 candidate from your application directory:
 
 ```sh
-npm install 'git+ssh://git@github.com/jaseeerr/dompet.git#v1.0.0-rc.3'
+npm install 'git+ssh://git@github.com/jaseeerr/dompet.git#v1.0.0-rc.4'
 ```
 
-For an immutable pin, replace `v1.0.0-rc.3` with the full commit SHA returned by `git ls-remote git@github.com:jaseeerr/dompet.git refs/tags/v1.0.0-rc.3`. Commit your application's lockfile and use `npm ci` in subsequent builds. The repository tracks the compiled ESM library, declarations and self-hosted character assets. Installing with `--ignore-scripts` is supported.
+For an immutable pin, replace `v1.0.0-rc.4` with the full commit SHA returned by `git ls-remote git@github.com:jaseeerr/dompet.git refs/tags/v1.0.0-rc.4`. Commit your application's lockfile and use `npm ci` in subsequent builds. The repository tracks the compiled ESM library, declarations and self-hosted character assets. Installing with `--ignore-scripts` is supported.
 
 For a private CI consumer, grant its deploy key read-only access and load the private key from the CI secret store. Use verified GitHub host keys. An approved read-only machine credential can also authenticate Git through a credential helper. Keep credentials out of dependency URLs, lockfiles and logs.
 
@@ -18,7 +18,7 @@ In a browser entry module, initialize the pet after the document body exists.
 ```js
 import { DOMPet } from "dompet";
 
-const pet = new DOMPet({ character: "human", respectReducedMotion: true });
+const pet = new DOMPet({ character: "spiderman", respectReducedMotion: true });
 pet.start(); // After the document body exists.
 ```
 
@@ -50,7 +50,7 @@ All constructor options are optional.
 
 | Option | Default | Meaning |
 | --- | --- | --- |
-| `character` | `"human"` | Select `"human"` or `"cat"` |
+| `character` | `"spiderman"` | Select `"spiderman"`, `"human"` or `"cat"` |
 | `size` | 112 desktop, 88 at viewport widths up to 600 px | Positive character size in CSS pixels, capped to the viewport |
 | `renderer` | `"auto"` | Prefer WebGL with sprite fallback. Choose `"sprite"` for the selected character’s 2D renderer or `"webgl"` to request 3D with recovery. |
 | `speed` | `1` | Positive horizontal speed multiplier on 180 CSS pixels per second |
@@ -102,7 +102,7 @@ A refresh that changes the platform geometry or viewport invalidates the current
 
 ## Cat rendering
 
-DOMPet loads Three.js and the selected GLB on demand. The human’s size is its standing height. Its embedded Idle, Walk, Turn, JumpTakeoff, Airborne and Land clips follow simulation time and distance, with Blink layered independently on the eyelids. Its support footprint is 26% of its height. Choose `character: "cat"` for the tabby, or `{character:"cat",renderer:"sprite",size:32}` for the prototype pixel art.
+DOMPet loads Three.js and the selected GLB on demand. The human’s size is its standing height. Its embedded Idle, Walk, Turn, JumpTakeoff, Airborne and Land clips follow simulation time and distance, with Blink layered independently on the mask lenses or eyelids. Its support footprint is 26% of its height. Choose `character: "cat"` for the tabby, or `{character:"cat",renderer:"sprite",size:32}` for the prototype pixel art.
 
 For direct ESM deployment, copy the entire `dist/` directory under your site path and import its `index.js`. Keep `chunks/` and `assets/` beside it. Allow same-origin scripts and model fetches in CSP and permit `data:` images for the embedded fallback. A failed import, model request or WebGL context switches to a 2D rendering of the selected character at the current feet. Inspect `[data-dompet]` and its `data-renderer` attribute for loading, webgl or sprite. Vite consumers can import the package by name. [Art provenance](src/characters/ART.md)
 

@@ -4,7 +4,7 @@ export function scene(
   host: ShadowRoot,
   lost: () => void,
   signal: AbortSignal,
-  character: "human" | "cat",
+  character: "human" | "cat" | "spiderman",
 ): Promise<{
   draw(
     body: Body,

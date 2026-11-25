@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0-rc.4
+
+Spider-Man is the default character with animated mask lenses, seven authored clips, short blends between body poses and a matching 2D fallback. Explicit human and cat selections remain available.
+
 ## 1.0.0-rc.3
 
 The supplied rigged human is now the default companion. Walking, blinking, turning and jump phases use its embedded clips. A human sprite sheet provides offline graphics fallback. Existing explicit cat selections retain the tabby.

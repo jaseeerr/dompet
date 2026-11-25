@@ -3,9 +3,10 @@ import * as T from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import url from "../src/characters/tabby.glb?url";
 import humanUrl from "../downloaded assets/dompet-human.glb?url";
+import spiderUrl from "../downloaded assets/spiderman/dompet-spiderman.glb?url";
 export async function renderFallback(human = false) {
   const { scene: cat, animations } = await new GLTFLoader().loadAsync(
-    human ? humanUrl : url,
+    human === "spiderman" ? spiderUrl : human ? humanUrl : url,
   );
   const stage = new T.Scene(),
     camera = new T.OrthographicCamera(-1.64, 1.64, 2.3575, -0.1025, 0.1, 20);

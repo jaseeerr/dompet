@@ -16,7 +16,12 @@ function configure() {
     !debug.checked;
   document.querySelector<HTMLOutputElement>("#motion")!.value = "";
   pet = new DOMPet({
-    character: character.value === "cat" ? "cat" : "human",
+    character:
+      character.value === "cat"
+        ? "cat"
+        : character.value === "human"
+          ? "human"
+          : "spiderman",
     debug: debug.checked,
     renderer: renderer.value === "sprite" ? "sprite" : "auto",
     size: size.value ? Number(size.value) : undefined,

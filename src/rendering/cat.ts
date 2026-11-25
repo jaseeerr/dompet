@@ -1,3 +1,5 @@
+import spiderSheet from "../characters/spiderman-fallback.webp?inline";
+import type { DOMPetOptions } from "../index.js";
 import humanSheet from "../characters/human-fallback.webp?inline";
 import texturedSheet from "../characters/tabby-fallback.webp?inline";
 import sheet from "../characters/tabby.png?inline";
@@ -72,8 +74,9 @@ export function loadCat(
   redraw: () => void,
   failed: () => void,
   textured = false,
-  human = false,
+  character: DOMPetOptions["character"] = "cat",
 ) {
+  const human = character !== "cat";
   const frameScale = textured || human ? 6 : 1;
   const image = new Image();
   let ready = false;
@@ -89,7 +92,14 @@ export function loadCat(
     redraw();
     failed();
   };
-  image.src = human ? humanSheet : textured ? texturedSheet : sheet;
+  image.src =
+    character === "spiderman"
+      ? spiderSheet
+      : human
+        ? humanSheet
+        : textured
+          ? texturedSheet
+          : sheet;
   return {
     draw(
       ctx: CanvasRenderingContext2D,

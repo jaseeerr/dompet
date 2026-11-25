@@ -1,7 +1,7 @@
 import * as T from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { humanHeight } from "../src/rendering/human.js";
-import url from "../downloaded assets/dompet-human.glb?url";
+import url from "../downloaded assets/spiderman/dompet-spiderman.glb?url";
 const canvas = document.querySelector("canvas"),
   renderer = new T.WebGLRenderer({ canvas, antialias: true, alpha: true });
 const scene = new T.Scene(),

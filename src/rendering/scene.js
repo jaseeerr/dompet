@@ -3,6 +3,7 @@ import * as T from "three";
 import { pose, standingWidth } from "./pose.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import devAsset from "../characters/tabby.glb?url";
+import spiderAsset from "../../downloaded assets/spiderman/dompet-spiderman.glb?url";
 import humanAsset from "../../downloaded assets/dompet-human.glb?url";
 import { humanAnimator, humanHeight } from "./human.js";
 function catAnimator(root) {
@@ -36,16 +37,18 @@ function catAnimator(root) {
   };
 }
 export async function scene(host, lost, signal, character) {
-  const human = character === "human";
-  const url = import.meta.env.DEV
-    ? human
-      ? humanAsset
-      : devAsset
-    : human
-      ? new URL("../assets/dompet-human.glb", import.meta.url).href
-      : new URL("../assets/tabby.glb", import.meta.url).href;
+  const human = character !== "cat";
+  const urls = import.meta.env.DEV
+    ? { spiderman: spiderAsset, human: humanAsset, cat: devAsset }
+    : {
+        spiderman: new URL("../assets/dompet-spiderman.glb", import.meta.url)
+          .href,
+        human: new URL("../assets/dompet-human.glb", import.meta.url).href,
+        cat: new URL("../assets/tabby.glb", import.meta.url).href,
+      };
+  const url = urls[character];
   const response = await fetch(url, { signal });
-  if (!response.ok) throw Error("Tabby asset unavailable");
+  if (!response.ok) throw Error("Character asset unavailable");
   const { scene: root, animations } = await new GLTFLoader().parseAsync(
     await response.arrayBuffer(),
     "",

@@ -8,6 +8,8 @@ export function humanAnimator(root, clips) {
     clips.map((clip) => [clip.name, mixer.clipAction(clip)]),
   );
   const blink = actions.Blink.play();
+  let outgoing, transitionStart;
+  const takeoffEnd = actions.JumpTakeoff.getClip().duration;
   let previous,
     wasGrounded = false,
     landed = -Infinity,
@@ -17,11 +19,15 @@ export function humanAnimator(root, clips) {
       const now = animation.clock / 1000,
         grounded = body.support !== null;
       if (now < lastClock) {
+        outgoing?.stop();
+        previous?.stop();
+        outgoing = previous = undefined;
         landed = -Infinity;
         wasGrounded = false;
       }
       if (grounded && !wasGrounded) landed = now;
       wasGrounded = grounded;
+      const delta = now - lastClock;
       lastClock = now;
       const turning = animation.heading > 0 && animation.heading < 1;
       let name = "Idle",
@@ -32,11 +38,17 @@ export function humanAnimator(root, clips) {
           animation.clip === "jump" && animation.elapsed < 160
             ? "JumpTakeoff"
             : "Airborne";
-        time = name === "JumpTakeoff" ? 0.34 + animation.elapsed / 1000 : 0;
+        time =
+          name === "JumpTakeoff"
+            ? takeoffEnd - 0.16 + animation.elapsed / 1000
+            : 0;
       } else if (animation.anticipation > 0.2) {
         name = "JumpTakeoff";
-        time = 0.34 * animation.anticipation;
-      } else if (now - landed < actions.Land.getClip().duration) {
+        time = (takeoffEnd - 0.16) * animation.anticipation;
+      } else if (
+        now - landed <
+        (body.vx ? 0.16 : actions.Land.getClip().duration)
+      ) {
         name = "Land";
         time = now - landed;
       } else if (turning) {
@@ -51,9 +63,22 @@ export function humanAnimator(root, clips) {
       }
       const action = actions[name];
       if (previous !== action) {
-        previous?.stop();
+        outgoing?.stop();
+        outgoing = previous;
+        transitionStart = now - Math.max(0, delta);
         action.play();
         previous = action;
+      }
+      const blend = outgoing
+        ? Math.min(1, Math.max(0, (now - transitionStart) / 0.09))
+        : 1;
+      action.setEffectiveWeight(blend);
+      if (outgoing) {
+        outgoing.setEffectiveWeight(1 - blend);
+        if (blend === 1) {
+          outgoing.stop();
+          outgoing = undefined;
+        }
       }
       action.time = time;
       blink.time = Math.min(now % 3.7, blink.getClip().duration);

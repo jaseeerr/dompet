@@ -22,7 +22,7 @@ test("renders the packaged rig and recovers at the same feet after context loss"
   expect(await page.locator("#motion").innerText()).toBe(before);
 });
 test("uses the sprite when the GLB cannot load", async ({ page }) => {
-  await page.route(/dompet-human\.glb(?:$|\?(?!import))/, (route) => route.abort());
+  await page.route(/dompet-spiderman\.glb(?:$|\?(?!import))/, (route) => route.abort());
   await page.goto("/");
   await expect(page.locator("[data-dompet]")).toHaveAttribute(
     "data-renderer",
@@ -59,7 +59,7 @@ test("releases 100 initialized WebGL pets and pending model loads", async ({
   expect(count).toBe(0);
 });
 test("recovers from corrupt model bytes", async ({ page }) => {
-  await page.route(/dompet-human\.glb(?:$|\?(?!import))/, (route) =>
+  await page.route(/dompet-spiderman\.glb(?:$|\?(?!import))/, (route) =>
     route.fulfill({ body: "invalid binary data" }),
   );
   await page.goto("/");

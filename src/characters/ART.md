@@ -19,3 +19,7 @@ The supplied source GLB in `downloaded assets/` contains an indexed 11,002-trian
 ## V1 rc.3 human
 
 The supplied dompet-human.glb is shipped byte-for-byte. Its metadata names an original DOMPet human, declares no third-party asset notices and specifies Y up, +Z forward, an anchor between the soles and a 0.82 m walk cycle. Its embedded surface materials and eyelid morph targets are used directly. The 2D sheet was baked from the same model.
+
+## V1 rc.4 Spider-Man
+
+The supplied dompet-spiderman.glb includes custom geometry, suit and mask textures, an emblem, rig and seven clips. Its metadata identifies Spider-Man as a Marvel character and states that no character license is supplied. The fallback frames are renders of this same asset.

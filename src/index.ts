@@ -18,7 +18,7 @@ import { drawPlatforms } from "./debug/platforms.js";
 import type { Snapshot } from "./world/platform.js";
 export interface DOMPetOptions extends ScanOptions {
   renderer?: "auto" | "sprite" | "webgl";
-  character?: "cat" | "human";
+  character?: "cat" | "human" | "spiderman";
   speed?: number;
   gravity?: number;
   zIndex?: number;
@@ -150,12 +150,12 @@ export class DOMPet {
     return this.#debug ? this.#inspect?.() : undefined;
   }
 
-  #character: "human" | "cat";
+  #character: NonNullable<DOMPetOptions["character"]>;
   #refresh?: () => void;
   constructor(options: DOMPetOptions = {}) {
-    this.#character = options.character ?? "human";
-    if (!["cat", "human"].includes(this.#character))
-      throw new TypeError("character must be human or cat");
+    this.#character = options.character ?? "spiderman";
+    if (!["cat", "human", "spiderman"].includes(this.#character))
+      throw new TypeError("character must be spiderman, human or cat");
     for (const key of ["debug", "respectReducedMotion"] as const)
       if (options[key] !== undefined && typeof options[key] !== "boolean")
         throw new TypeError(key + " must be boolean");
@@ -272,16 +272,16 @@ export class DOMPet {
     let body = spawn({ width: host.clientWidth, height: host.clientHeight });
     let graph: Graph;
     let explorer: Explorer;
-    const human = this.#character === "human";
+    const human = this.#character !== "cat";
     const sprite = loadCat(
       draw,
       () =>
         this.#emit(
           "error",
-          new Error("Cat sprite unavailable; drawing fallback"),
+          new Error("Character sprite unavailable; drawing fallback"),
         ),
       this.#renderer !== "sprite",
-      human,
+      this.#character,
     );
     const assetController = new AbortController();
     let model:

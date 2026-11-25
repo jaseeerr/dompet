@@ -7,6 +7,16 @@ export default defineConfig({
       generateBundle() {
         this.emitFile({
           type: "asset",
+          fileName: "assets/dompet-spiderman.glb",
+          source: readFileSync(
+            new URL(
+              "./downloaded assets/spiderman/dompet-spiderman.glb",
+              import.meta.url,
+            ),
+          ),
+        });
+        this.emitFile({
+          type: "asset",
           fileName: "assets/dompet-human.glb",
           source: readFileSync(
             new URL("./downloaded assets/dompet-human.glb", import.meta.url),
