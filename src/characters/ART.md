@@ -15,3 +15,7 @@ The export contains the pose reel and idle, walk, turn, jump, fall, land and sle
 ## V1 rc.2 textured tabby
 
 The supplied source GLB in `downloaded assets/` contains an indexed 11,002-triangle mesh, its UV layout and an embedded PNG coat. It arrived without animation, a skeleton or embedded license terms. The export script preserves the texture, maps the mesh onto the DOMPet skeleton and bakes eight clips. The eyes are painted into the coat. The automatic 2D fallback uses fifteen poses from this same asset. The explicit sprite renderer uses the original pixel sheet.
+
+## V1 rc.3 human
+
+The supplied dompet-human.glb is shipped byte-for-byte. Its metadata names an original DOMPet human, declares no third-party asset notices and specifies Y up, +Z forward, an anchor between the soles and a 0.82 m walk cycle. Its embedded surface materials and eyelid morph targets are used directly. The 2D sheet was baked from the same model.

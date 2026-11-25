@@ -1,7 +1,7 @@
 import type { Behaviour, Body, ScanOptions } from "./types.js";
 export interface DOMPetOptions extends ScanOptions {
     renderer?: "auto" | "sprite" | "webgl";
-    character?: "cat";
+    character?: "cat" | "human";
     speed?: number;
     gravity?: number;
     zIndex?: number;

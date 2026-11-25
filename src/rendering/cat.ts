@@ -1,3 +1,4 @@
+import humanSheet from "../characters/human-fallback.webp?inline";
 import texturedSheet from "../characters/tabby-fallback.webp?inline";
 import sheet from "../characters/tabby.png?inline";
 import { tabby, type Clip } from "../characters/tabby.js";
@@ -71,8 +72,9 @@ export function loadCat(
   redraw: () => void,
   failed: () => void,
   textured = false,
+  human = false,
 ) {
-  const frameScale = textured ? 6 : 1;
+  const frameScale = textured || human ? 6 : 1;
   const image = new Image();
   let ready = false;
   image.onload = () => {
@@ -87,7 +89,7 @@ export function loadCat(
     redraw();
     failed();
   };
-  image.src = textured ? texturedSheet : sheet;
+  image.src = human ? humanSheet : textured ? texturedSheet : sheet;
   return {
     draw(
       ctx: CanvasRenderingContext2D,
@@ -96,14 +98,14 @@ export function loadCat(
       size: number,
       dpr: number,
     ) {
-      const scale = size / tabby.width;
+      const scale = size / (human ? tabby.anchorY : tabby.width);
       ctx.save();
       ctx.translate(
         Math.round(body.x * dpr) / dpr,
         Math.round(body.y * dpr) / dpr,
       );
       ctx.scale(animation.facing * scale, scale);
-      ctx.imageSmoothingEnabled = textured;
+      ctx.imageSmoothingEnabled = textured || human;
       if (ready) {
         ctx.drawImage(
           image,
@@ -116,7 +118,7 @@ export function loadCat(
           tabby.width,
           tabby.height,
         );
-      } else {
+      } else if (!human) {
         ctx.fillStyle = "#43323d";
         ctx.fillRect(-12, -16, 24, 16);
         ctx.fillRect(-10, -21, 5, 6);

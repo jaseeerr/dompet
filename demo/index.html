@@ -15,9 +15,9 @@
     <main>
       <header class="cover">
         <div class="intro">
-          <h1>A house cat’s<br /><em>field journal.</em></h1>
+          <h1>A companion’s<br /><em>field journal.</em></h1>
           <p>
-            Follow a small tabby through its favourite indoor perches. Record
+            Follow your companion through its favourite indoor perches. Record
             what you spot along the way.
           </p>
         </div>
@@ -29,7 +29,9 @@
           aria-label="Pixel-art reading nook with a sunny window, books and a potted plant"
         ></canvas>
       </header>
-      <p><a href="./character.html">Inspect the tabby rig and animations</a></p>
+      <p>
+        <a href="./character.html">Inspect the companion rig and animations</a>
+      </p>
       <section class="settings" aria-label="Pet settings">
         <label
           >Renderer
@@ -38,9 +40,16 @@
             <option value="sprite">Sprite</option>
           </select></label
         >
+        <label
+          >Character
+          <select id="character">
+            <option value="human">Human</option>
+            <option value="cat">Cat</option>
+          </select></label
+        >
         <button id="toggle">Pause pet</button
         ><label
-          >Cat size
+          >Character size
           <select id="size">
             <option value="88">Small · 88 px</option>
             <option value="" selected>Responsive</option>
@@ -78,7 +87,7 @@
           <article>
             <h3>Window seat</h3>
             <p>
-              Morning sun warms the sill. Look for the tabby here after
+              Morning sun warms the sill. Look for the companion here after
               breakfast.
             </p>
           </article>
@@ -100,7 +109,7 @@
               required
               name="observation"
               autocomplete="off"
-              placeholder="What did the cat do?" /></label
+              placeholder="What did the companion do?" /></label
           ><button>Save note</button>
         </form>
         <div class="panel" tabindex="0" aria-label="Scrollable field notes">

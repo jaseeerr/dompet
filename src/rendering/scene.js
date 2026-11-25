@@ -3,13 +3,50 @@ import * as T from "three";
 import { pose, standingWidth } from "./pose.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import devAsset from "../characters/tabby.glb?url";
-export async function scene(host, lost, signal) {
+import humanAsset from "../../downloaded assets/dompet-human.glb?url";
+import { humanAnimator, humanHeight } from "./human.js";
+function catAnimator(root) {
+  const node = (name) => root.getObjectByName(name);
+  const legs = [];
+  for (const front of [false, true])
+    for (const side of [-1, 1]) {
+      const id = (front ? "fore" : "hind") + (side === 1 ? "Near" : "Far");
+      legs.push({
+        hip: node(id),
+        knee: node(id + "Knee"),
+        ankle: node(id + "Ankle"),
+        front,
+        side,
+      });
+    }
+  const rig = {
+    root,
+    chest: node("chest"),
+    spine: node("spine"),
+    head: node("neck"),
+    ears: [node("earHinge-1"), node("earHinge1")],
+    eyes: [node("eyelid-1"), node("eyelid1")],
+    legs,
+    tail: Array.from({ length: 7 }, (_, i) => node("tail" + i)),
+  };
+  const contacts = legs.map((leg) => node(leg.hip.name + "Contact"));
+  return {
+    contacts,
+    draw: (group, body, anim, size) => pose(rig, group, body, anim, size),
+  };
+}
+export async function scene(host, lost, signal, character) {
+  const human = character === "human";
   const url = import.meta.env.DEV
-    ? devAsset
-    : new URL("../assets/tabby.glb", import.meta.url).href;
+    ? human
+      ? humanAsset
+      : devAsset
+    : human
+      ? new URL("../assets/dompet-human.glb", import.meta.url).href
+      : new URL("../assets/tabby.glb", import.meta.url).href;
   const response = await fetch(url, { signal });
   if (!response.ok) throw Error("Tabby asset unavailable");
-  const { scene: root } = await new GLTFLoader().parseAsync(
+  const { scene: root, animations } = await new GLTFLoader().parseAsync(
     await response.arrayBuffer(),
     "",
   );
@@ -36,31 +73,7 @@ export async function scene(host, lost, signal) {
     disposeAsset();
     throw new Error("Disposed");
   }
-  const node = (name) => root.getObjectByName(name);
-  const legs = [];
-  for (const front of [false, true])
-    for (const side of [-1, 1]) {
-      const id = (front ? "fore" : "hind") + (side === 1 ? "Near" : "Far");
-      legs.push({
-        hip: node(id),
-        knee: node(id + "Knee"),
-        ankle: node(id + "Ankle"),
-        front,
-        side,
-      });
-    }
-  const rig = {
-    root,
-    chest: node("chest"),
-    spine: node("spine"),
-    head: node("neck"),
-    ears: [node("earHinge-1"), node("earHinge1")],
-    eyes: [node("eyelid-1"), node("eyelid1")],
-    legs,
-    tail: Array.from({ length: 7 }, (_, i) => node("tail" + i)),
-    dispose: disposeAsset,
-  };
-  const contacts = legs.map((leg) => node(leg.hip.name + "Contact"));
+  const avatar = human ? humanAnimator(root, animations) : catAnimator(root);
   const marker = new T.Vector3();
   const canvas = document.createElement("canvas");
   let gl;
@@ -81,13 +94,13 @@ export async function scene(host, lost, signal) {
   const key = new T.DirectionalLight(0xffe6c2, 2.5);
   key.position.set(3, 5, 4);
   stage.add(key);
-  cat.add(rig.root);
+  cat.add(root);
   let previousSize = 0;
   return {
     draw(body, animation, size, ratio, visible, debug) {
       canvas.hidden = !visible;
       if (!visible) return;
-      const px = (size * 4) / standingWidth;
+      const px = (size * 4) / (human ? humanHeight : standingWidth);
       if (
         previousSize !== px ||
         gl.getPixelRatio() !==
@@ -102,19 +115,19 @@ export async function scene(host, lost, signal) {
       camera.top = 3.2;
       camera.bottom = -0.8;
       camera.updateProjectionMatrix();
-      pose(rig, cat, body, animation, size);
+      avatar.draw(cat, body, animation, size);
       gl.render(stage, camera);
       if (debug) {
         debug.save();
         debug.strokeStyle = "#347678";
         debug.strokeRect(
-          body.x - size * 0.215,
-          body.y - size * 0.56,
-          size * 0.43,
-          size * 0.56,
+          body.x - size * (human ? 0.13 : 0.215),
+          body.y - size * (human ? 1 : 0.56),
+          size * (human ? 0.26 : 0.43),
+          size * (human ? 1 : 0.56),
         );
         debug.fillStyle = "#086867";
-        for (const point of contacts) {
+        for (const point of avatar.contacts ?? []) {
           point.getWorldPosition(marker).project(camera);
           debug.fillRect(
             body.x + (marker.x * px) / 2 - 1,
@@ -128,7 +141,8 @@ export async function scene(host, lost, signal) {
     },
     dispose() {
       canvas.removeEventListener("webglcontextlost", lost);
-      rig.dispose();
+      avatar.dispose?.();
+      disposeAsset();
       gl.dispose();
       gl.forceContextLoss();
       canvas.remove();

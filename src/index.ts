@@ -18,7 +18,7 @@ import { drawPlatforms } from "./debug/platforms.js";
 import type { Snapshot } from "./world/platform.js";
 export interface DOMPetOptions extends ScanOptions {
   renderer?: "auto" | "sprite" | "webgl";
-  character?: "cat";
+  character?: "cat" | "human";
   speed?: number;
   gravity?: number;
   zIndex?: number;
@@ -150,10 +150,12 @@ export class DOMPet {
     return this.#debug ? this.#inspect?.() : undefined;
   }
 
+  #character: "human" | "cat";
   #refresh?: () => void;
   constructor(options: DOMPetOptions = {}) {
-    if (options.character !== undefined && options.character !== "cat")
-      throw new TypeError("character must be cat");
+    this.#character = options.character ?? "human";
+    if (!["cat", "human"].includes(this.#character))
+      throw new TypeError("character must be human or cat");
     for (const key of ["debug", "respectReducedMotion"] as const)
       if (options[key] !== undefined && typeof options[key] !== "boolean")
         throw new TypeError(key + " must be boolean");
@@ -225,6 +227,7 @@ export class DOMPet {
   #mount() {
     const host = document.createElement("div");
     host.dataset.dompet = "";
+    host.dataset.character = this.#character;
     host.setAttribute("aria-hidden", "true");
     host.inert = true;
     host.style.cssText =
@@ -269,6 +272,7 @@ export class DOMPet {
     let body = spawn({ width: host.clientWidth, height: host.clientHeight });
     let graph: Graph;
     let explorer: Explorer;
+    const human = this.#character === "human";
     const sprite = loadCat(
       draw,
       () =>
@@ -277,6 +281,7 @@ export class DOMPet {
           new Error("Cat sprite unavailable; drawing fallback"),
         ),
       this.#renderer !== "sprite",
+      human,
     );
     const assetController = new AbortController();
     let model:
@@ -298,6 +303,7 @@ export class DOMPet {
             host.shadowRoot!,
             fallback,
             assetController.signal,
+            this.#character,
           );
           if (disposed) {
             loaded.dispose();
@@ -344,7 +350,7 @@ export class DOMPet {
       dirty = undefined;
       if (metrics) drawPlatforms(ctx, world, metrics);
       const left = body.x - size / 2,
-        top = body.y - (size * tabby.anchorY) / tabby.width;
+        top = body.y - (human ? size : (size * tabby.anchorY) / tabby.width);
       const visible = !scanner.zones.some(
         (r) =>
           left < r.right &&
@@ -411,8 +417,8 @@ export class DOMPet {
       ratio = window.devicePixelRatio || 1;
       size = Math.min(width, height, override ?? (width <= 600 ? 88 : 112));
       settings.fullFootprint = true;
-      settings.width = size * 0.43;
-      settings.height = size * 0.56;
+      settings.width = size * (human ? 0.26 : 0.43);
+      settings.height = size * (human ? 1 : 0.56);
       if (initial) {
         body = spawn(bounds(), settings);
         initial = false;

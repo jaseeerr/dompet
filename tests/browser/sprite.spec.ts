@@ -16,7 +16,12 @@ for (const dpr of [1, 2, 3]) {
         )) as typeof import("../../demo/fixtures/entry");
         const results = [];
         for (const size of [24, 32, 64]) {
-          const pet = new DOMPet({ renderer: "sprite", debug: true, size });
+          const pet = new DOMPet({
+            character: "cat",
+            renderer: "sprite",
+            debug: true,
+            size,
+          });
           pet.start();
           pet.pause();
           // Compare the sampled sprite colours inside the footprint against the native palette.
@@ -53,7 +58,7 @@ for (const dpr of [1, 2, 3]) {
           results.push(pixels());
           pet.destroy();
         }
-        const pet = new DOMPet({ renderer: "sprite" });
+        const pet = new DOMPet({ character: "cat", renderer: "sprite" });
         pet.start();
         pet.pause();
         return {
@@ -102,7 +107,11 @@ test("pending and failed image loads preserve the fallback and release callbacks
     const { DOMPet } = (await import(
       url.href
     )) as typeof import("../../demo/fixtures/entry");
-    const pet = new DOMPet({ renderer: "sprite", debug: true });
+    const pet = new DOMPet({
+      character: "cat",
+      renderer: "sprite",
+      debug: true,
+    });
     pet.start();
     pet.pause();
     const state = pet.debugState!;
@@ -116,7 +125,7 @@ test("pending and failed image loads preserve the fallback and release callbacks
     images[0].dispatchEvent(new Event("error"));
     const failed = pixel();
     pet.destroy();
-    const second = new DOMPet({ renderer: "sprite" });
+    const second = new DOMPet({ character: "cat", renderer: "sprite" });
     second.start();
     second.destroy();
     return {

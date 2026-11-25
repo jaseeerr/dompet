@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0-rc.3
+
+The supplied rigged human is now the default companion. Walking, blinking, turning and jump phases use its embedded clips. A human sprite sheet provides offline graphics fallback. Existing explicit cat selections retain the tabby.
+
 ## 1.0.0-rc.2
 
 Replaces the procedural cat with the supplied textured orange tabby, rigged for the existing movement system. Automatic fallback draws poses rendered from the same coat. Set `renderer: "sprite"` for the original pixel art.

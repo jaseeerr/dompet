@@ -1,13 +1,13 @@
 import * as T from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { standingWidth } from "../src/rendering/pose.js";
-import url from "../src/characters/tabby.glb?url";
+import { humanHeight } from "../src/rendering/human.js";
+import url from "../downloaded assets/dompet-human.glb?url";
 const canvas = document.querySelector("canvas"),
   renderer = new T.WebGLRenderer({ canvas, antialias: true, alpha: true });
 const scene = new T.Scene(),
   camera = new T.OrthographicCamera(-2, 2, 2, -2, 0.1, 100);
 camera.position.set(0, 1, 8);
-camera.lookAt(0, 0.8, 0);
+camera.lookAt(0, 1.08, 0);
 const { scene: cat, animations } = await new GLTFLoader().loadAsync(url);
 const pivot = new T.Group();
 pivot.add(cat);
@@ -49,7 +49,7 @@ renderer.setAnimationLoop((time) => {
     renderer.setSize(w, h, false);
     previousScale = scale.value;
     const half = scale.value
-      ? (h * standingWidth) / (2 * Number(scale.value))
+      ? (h * humanHeight) / (2 * Number(scale.value))
       : 1.3;
     camera.left = (-half * w) / h;
     camera.right = -camera.left;

@@ -7,6 +7,7 @@ const size = document.querySelector<HTMLSelectElement>("#size")!;
 const speed = document.querySelector<HTMLSelectElement>("#speed")!;
 debug.checked = new URLSearchParams(location.search).has("debug");
 const renderer = document.querySelector<HTMLSelectElement>("#renderer")!;
+const character = document.querySelector<HTMLSelectElement>("#character")!;
 let paused = false;
 let pet: DOMPet;
 function configure() {
@@ -15,6 +16,7 @@ function configure() {
     !debug.checked;
   document.querySelector<HTMLOutputElement>("#motion")!.value = "";
   pet = new DOMPet({
+    character: character.value === "cat" ? "cat" : "human",
     debug: debug.checked,
     renderer: renderer.value === "sprite" ? "sprite" : "auto",
     size: size.value ? Number(size.value) : undefined,
@@ -24,7 +26,7 @@ function configure() {
   if (paused) pet.pause();
 }
 configure();
-for (const control of [size, speed, debug, renderer])
+for (const control of [size, speed, debug, renderer, character])
   control.onchange = configure;
 const bind = (id: string, handler: () => void) => {
   document.querySelector<HTMLButtonElement>(id)!.onclick = handler;

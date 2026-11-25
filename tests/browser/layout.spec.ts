@@ -14,7 +14,7 @@ async function setup(page: Page) {
       url.href
     )) as typeof import("../../demo/fixtures/entry");
     const style = document.createElement("style");
-    style.textContent = `body{margin:0;min-height:160vh} #panel{position:relative;margin:70px 0 0 5vw;width:90vw;height:200px;overflow:auto} #list{height:600px} #perch{position:relative;top:60px;margin-left:5%;width:85%;height:30px;background:salmon} #zone{position:fixed;top:10px;left:0;width:20px;height:12px;background:black} #sticky{position:sticky;top:0;background:navy;height:24px;z-index:2}@media(max-width:600px){#perch{top:48px}}`;
+    style.textContent = `body{margin:0;min-height:160vh} #panel{position:relative;margin:120px 0 0 5vw;width:90vw;height:200px;overflow:auto} #list{height:600px} #perch{position:relative;top:60px;margin-left:5%;width:85%;height:30px;background:salmon} #zone{position:fixed;top:10px;left:0;width:20px;height:12px;background:black} #sticky{position:sticky;top:0;background:navy;height:24px;z-index:2}@media(max-width:600px){#perch{top:48px}}`;
     document.head.append(style);
     document.body.innerHTML =
       '<header id="sticky"></header><div id="panel"><div id="list"><div id="perch"></div></div></div><dialog>Modal</dialog><div id="zone"></div>';

@@ -16,7 +16,7 @@ export declare class Animation {
     update(body: Body, wasGrounded: boolean, behaviour: Behaviour | "manual", ms: number, pitch?: number): void;
     get frame(): number;
 }
-export declare function loadCat(redraw: () => void, failed: () => void, textured?: boolean): {
+export declare function loadCat(redraw: () => void, failed: () => void, textured?: boolean, human?: boolean): {
     draw(ctx: CanvasRenderingContext2D, animation: Animation, body: Body, size: number, dpr: number): void;
     dispose(): void;
 };
