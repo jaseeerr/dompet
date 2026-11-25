@@ -13,6 +13,6 @@ export function scene(
     ratio: number,
     visible: boolean,
     debug?: CanvasRenderingContext2D,
-  ): void;
+  ): { x: number; y: number } | undefined;
   dispose(): void;
 }>;

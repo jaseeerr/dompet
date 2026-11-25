@@ -77,6 +77,8 @@ export async function scene(host, lost, signal, character) {
   }
   const avatar = human ? humanAnimator(root, animations) : catAnimator(root);
   const marker = new T.Vector3();
+  const webHand =
+    character === "spiderman" ? root.getObjectByName("HandR") : null;
   const canvas = document.createElement("canvas");
   let gl;
   try {
@@ -139,6 +141,13 @@ export async function scene(host, lost, signal, character) {
           );
         }
         debug.restore();
+      }
+      if (animation.web && webHand) {
+        webHand.getWorldPosition(marker).project(camera);
+        return {
+          x: body.x + (marker.x * px) / 2,
+          y: body.y - px * 0.8 + ((1 - marker.y) * px) / 2,
+        };
       }
     },
     dispose() {

@@ -2,7 +2,9 @@ import type { DOMPetOptions } from "../index.js";
 import { type Clip } from "../characters/tabby.js";
 import type { Body } from "../physics/motion.js";
 import type { Behaviour } from "../behaviour/explorer.js";
+import { type WebPose } from "../physics/web.js";
 export declare class Animation {
+    web?: WebPose;
     clip: Clip;
     facing: 1 | -1;
     elapsed: number;

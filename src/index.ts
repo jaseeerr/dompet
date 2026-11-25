@@ -13,10 +13,16 @@ import {
   spawn,
   type Intent,
 } from "./physics/motion.js";
+import {
+  webAnchor,
+  webPullDuration,
+  webRelease,
+  webShootDuration,
+} from "./physics/web.js";
 import { playback } from "./playback.js";
 import { Scanner } from "./dom/scanner.js";
 import { drawPlatforms } from "./debug/platforms.js";
-import type { Snapshot } from "./world/platform.js";
+import type { Platform, Snapshot } from "./world/platform.js";
 export interface DOMPetOptions extends ScanOptions {
   renderer?: "auto" | "sprite" | "webgl";
   character?: "cat" | "human" | "spiderman";
@@ -283,6 +289,87 @@ export class DOMPet {
           )
         : undefined;
     let biped = newBiped();
+    let web: { platformId: string; origin: Body; elapsed: number } | undefined;
+    let nextWebTime = 1200;
+    const webTarget = (platform: Platform | undefined, origin: Body) => {
+      if (!platform?.source?.isConnected || platform.y < size) return;
+      const anchor = webAnchor(platform, origin, settings.width);
+      if (
+        !anchor ||
+        origin.y - anchor.y < size * 0.45 ||
+        anchor.distance > Math.hypot(width, height) * 0.65
+      )
+        return;
+      const half = settings.width / 2;
+      if (
+        scanner.zones.some(
+          (zone) =>
+            Math.min(origin.x, anchor.x) - half < zone.right &&
+            Math.max(origin.x, anchor.x) + half > zone.left &&
+            anchor.y - size < zone.bottom &&
+            origin.y > zone.top,
+        )
+      )
+        return;
+      return anchor;
+    };
+    const advanceWeb = () => {
+      animation.web = undefined;
+      if (
+        !web &&
+        !this.#manual &&
+        this.#character === "spiderman" &&
+        body.support &&
+        !body.vx &&
+        explorer.state === "idle" &&
+        animation.clock >= nextWebTime
+      ) {
+        nextWebTime = animation.clock + 5000;
+        let nearest = Infinity;
+        for (const platform of world.platforms) {
+          const anchor = webTarget(platform, body);
+          if (anchor && anchor.distance < nearest) {
+            nearest = anchor.distance;
+            web = { platformId: platform.id, origin: body, elapsed: 0 };
+          }
+        }
+      }
+      if (!web) return false;
+      const anchor = this.#manual
+        ? undefined
+        : webTarget(
+            world.platforms.find((p) => p.id === web?.platformId),
+            web.origin,
+          );
+      if (!anchor || (body.support && body.support !== web.origin.support)) {
+        web = undefined;
+        return false;
+      }
+      const { elapsed, origin, platformId } = web;
+      web.elapsed += stepSeconds;
+      const shooting = elapsed < webShootDuration;
+      const pullTime = elapsed - webShootDuration;
+      animation.web = shooting
+        ? { clip: "WebShoot", time: elapsed }
+        : { clip: "WebPull", time: pullTime % webPullDuration };
+      if (shooting) return true;
+      const duration = Math.max(0.38, Math.min(0.95, anchor.distance / 650));
+      const progress = Math.min(1, pullTime / duration);
+      const eased = progress * progress * (3 - 2 * progress);
+      body = {
+        x: origin.x + (anchor.x - origin.x) * eased,
+        y: origin.y + (anchor.y - origin.y) * eased,
+        vx: 0,
+        vy: 0,
+        support: progress === 1 ? platformId : null,
+      };
+      if (progress === 1) {
+        web = undefined;
+        animation.web = undefined;
+        this.#replan?.();
+      }
+      return true;
+    };
     const sprite = loadCat(
       draw,
       () =>
@@ -348,18 +435,22 @@ export class DOMPet {
     this.#reset = () => {
       this.#intent = { direction: 0, jump: false };
       body = spawn(bounds(), settings);
+      web = undefined;
+      nextWebTime = 1200;
       animation = new Animation();
       biped = newBiped();
       draw();
     };
     let dirty: [number, number, number, number] | undefined;
+    let webDirty: typeof dirty;
     function draw() {
       if (!ctx || document.hidden) return;
       const start = metrics ? performance.now() : 0;
       layout.checkRoute();
       if (metrics) ctx.clearRect(0, 0, width, height);
       else if (dirty) ctx.clearRect(...dirty);
-      dirty = undefined;
+      if (!metrics && webDirty) ctx.clearRect(...webDirty);
+      dirty = webDirty = undefined;
       if (metrics) drawPlatforms(ctx, world, metrics);
       const left = body.x - size / 2,
         top = body.y - (human ? size : (size * tabby.anchorY) / tabby.width);
@@ -395,18 +486,50 @@ export class DOMPet {
           ctx.restore();
         }
       }
-      if (model)
-        model.draw(
-          body,
-          animation,
-          size,
-          ratio,
-          visible,
-          metrics ? ctx : undefined,
-        );
-      else if (visible) {
+      const wrist = model?.draw(
+        body,
+        animation,
+        size,
+        ratio,
+        visible,
+        metrics ? ctx : undefined,
+      );
+      if (!model && visible) {
         sprite.draw(ctx, animation, body, size, ratio);
         dirty = [left - 2, top - 2, size + 4, size + 4];
+      }
+      if (visible && web && animation.web && web.elapsed >= webRelease) {
+        const anchor = webTarget(
+          world.platforms.find((p) => p.id === web?.platformId),
+          web.origin,
+        );
+        if (anchor) {
+          const hand = wrist ?? {
+            x: body.x + animation.facing * size * 0.16,
+            y: body.y - size * 0.73,
+          };
+          const extension = Math.min(1, (web.elapsed - webRelease) / 0.12);
+          const x = hand.x + (anchor.x - hand.x) * extension;
+          const y = hand.y + (anchor.y - hand.y) * extension;
+          webDirty = [
+            Math.min(hand.x, x) - 3,
+            Math.min(hand.y, y) - 3,
+            Math.abs(x - hand.x) + 6,
+            Math.abs(y - hand.y) + 6,
+          ];
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(hand.x, hand.y);
+          ctx.lineTo(x, y);
+          ctx.lineCap = "round";
+          ctx.lineWidth = 2.5;
+          ctx.strokeStyle = "rgba(50, 58, 70, 0.6)";
+          ctx.stroke();
+          ctx.lineWidth = 1;
+          ctx.strokeStyle = "#f5f8fc";
+          ctx.stroke();
+          ctx.restore();
+        }
       }
       if (metrics) {
         metrics.physicsMs = physicsMs;
@@ -529,22 +652,26 @@ export class DOMPet {
         const plans = explorer.plans;
         const nextIntent = () =>
           this.#manual ? this.#intent : explorer.intent(body);
-        const intent = biped
-          ? biped.intent(
-              body,
-              nextIntent,
-              stepSeconds,
-              this.#manual ? this.#intent : undefined,
-            )
-          : nextIntent();
+        const grounded = body.support !== null;
+        const traversing = advanceWeb();
+        const intent = traversing
+          ? undefined
+          : biped
+            ? biped.intent(
+                body,
+                nextIntent,
+                stepSeconds,
+                this.#manual ? this.#intent : undefined,
+              )
+            : nextIntent();
         const physicsStart = metrics ? performance.now() : 0;
         if (metrics) {
           navigationMs += physicsStart - start;
           metrics.replans += explorer.plans - plans;
           metrics.graphEdges = graph.edgeCount;
         }
-        const grounded = body.support !== null;
-        body = step(body, intent, world.platforms, bounds(), this.#motion);
+        if (intent)
+          body = step(body, intent, world.platforms, bounds(), this.#motion);
         animation.update(
           body,
           grounded,
@@ -560,7 +687,17 @@ export class DOMPet {
           animation.landingTime = biped.landingTime;
         }
         if (metrics) physicsMs += performance.now() - physicsStart;
-        if (intent.jump) this.#intent.jump = false;
+        if (animation.web && web) {
+          const anchor = webTarget(
+            world.platforms.find((p) => p.id === web?.platformId),
+            web.origin,
+          );
+          if (anchor && anchor.x !== web.origin.x) {
+            animation.facing = anchor.x < web.origin.x ? -1 : 1;
+            animation.heading = animation.facing === 1 ? 0 : 1;
+          }
+        }
+        if (intent?.jump) this.#intent.jump = false;
         if (!grounded && body.support)
           this.#emit("landing", {
             platformId: body.support,

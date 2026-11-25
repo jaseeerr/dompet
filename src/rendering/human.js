@@ -90,6 +90,10 @@ export function humanAnimator(root, clips) {
         name = "Walk";
         time = ((animation.distance * humanHeight) / (size * 0.82)) % 1;
       }
+      if (animation.web && actions[animation.web.clip]) {
+        name = animation.web.clip;
+        time = animation.web.time;
+      }
       const action = actions[name];
       if (previous !== action) {
         outgoing?.stop();
@@ -114,7 +118,10 @@ export function humanAnimator(root, clips) {
       mixer.update(0);
       // Sample the same airborne base clip, then layer tuck on ascent and
       // extension on descent. Restore the sampled bones before the next frame.
-      const target = grounded ? 0 : Math.max(-1, Math.min(1, -body.vy / 480));
+      const target =
+        grounded || animation.web
+          ? 0
+          : Math.max(-1, Math.min(1, -body.vy / 480));
       flight += (target - flight) * (1 - Math.exp(-12 * Math.max(0, delta)));
       for (const part of flightBones) {
         part.base.copy(part.bone.quaternion);

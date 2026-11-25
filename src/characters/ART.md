@@ -22,4 +22,4 @@ The supplied dompet-human.glb is shipped byte-for-byte. Its metadata names an or
 
 ## V1 rc.4 Spider-Man
 
-The supplied dompet-spiderman.glb includes custom geometry, suit and mask textures, an emblem, rig and seven clips. Its metadata identifies Spider-Man as a Marvel character and states that no character license is supplied. The fallback frames are renders of this same asset.
+The supplied dompet-spiderman.glb includes custom geometry, suit and mask textures, an emblem, rig and ten clips. The WebShoot and WebPull clips drive web traversal, including the sprite fallback. WallCling is included in the GLB for future use. Its metadata identifies Spider-Man as a Marvel character and states that no character license is supplied. The fallback frames are renders of this same asset.

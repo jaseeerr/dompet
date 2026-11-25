@@ -32,15 +32,15 @@ export async function renderFallback(human = false) {
   const ctx = canvas.getContext("2d"),
     mixer = new T.AnimationMixer(cat);
   if (human === "spiderman") {
-    // Rows: idle, walk, right-to-left turn, takeoff, flight, land, blink.
+    // Rows: idle, walk, turn, takeoff, flight, land, blink, web shoot, web pull.
     const cols = 24;
     canvas.width = cols * 192;
-    canvas.height = 7 * 144;
+    canvas.height = 9 * 144;
     const group = new T.Group();
     group.add(cat);
     cat.rotation.y = 0;
     stage.add(group);
-    for (let row = 0; row < 7; row++) {
+    for (let row = 0; row < 9; row++) {
       const animator = humanAnimator(cat, animations);
       for (let col = 0; col < cols; col++) {
         const cycle = col / cols,
@@ -56,6 +56,12 @@ export async function renderFallback(human = false) {
           clip: row === 4 ? "fall" : "idle",
           anticipation: row === 3 ? t : 0,
           elapsed: 0,
+          web:
+            row === 7
+              ? { clip: "WebShoot", time: t * 0.4 }
+              : row === 8
+                ? { clip: "WebPull", time: cycle * 0.6 }
+                : undefined,
         };
         animator.draw(
           group,

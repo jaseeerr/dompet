@@ -7,7 +7,14 @@ import { tabby, type Clip } from "../characters/tabby.js";
 import type { Body } from "../physics/motion.js";
 import type { Behaviour } from "../behaviour/explorer.js";
 
+import {
+  webPullDuration,
+  webShootDuration,
+  type WebPose,
+} from "../physics/web.js";
+
 export class Animation {
+  web?: WebPose;
   clip: Clip = "fall";
   facing: 1 | -1 = tabby.facing;
   elapsed = 0;
@@ -86,7 +93,7 @@ export function loadCat(
   image.onload = () => {
     ready =
       image.naturalWidth === (spider ? 24 : 15) * tabby.width * frameScale &&
-      image.naturalHeight === (spider ? 7 : 1) * tabby.height * frameScale;
+      image.naturalHeight === (spider ? 9 : 1) * tabby.height * frameScale;
     redraw();
     if (!ready) failed();
   };
@@ -120,7 +127,12 @@ export function loadCat(
         facing = animation.facing;
       if (spider) {
         let phase = (animation.clock / 3600) % 1;
-        if (!body.support) {
+        if (animation.web) {
+          const shooting = animation.web.clip === "WebShoot";
+          row = shooting ? 7 : 8;
+          const duration = shooting ? webShootDuration : webPullDuration;
+          phase = Math.min(1, animation.web.time / duration);
+        } else if (!body.support) {
           row = 4;
           phase = Math.max(0, Math.min(1, (body.vy + 480) / 960));
         } else if (animation.landingTime < 1.02) {
