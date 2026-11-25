@@ -1,5 +1,5 @@
 # DOMPet
-A framework-independent browser pet. Spider-Man walks, turns, jumps, and zips by web to higher page surfaces.
+A framework-independent browser pet. Spider-Man walks, turns, jumps, and zips by web to higher page surfaces. The pet scurries away when the mouse comes close.
 
 ## Install the private release
 

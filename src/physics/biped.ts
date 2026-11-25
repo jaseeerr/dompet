@@ -22,7 +22,13 @@ export class BipedMovement {
   invalidate() {
     this.pending = undefined;
   }
-  intent(body: Body, next: () => Intent, dt: number, manual?: Intent): Intent {
+  intent(
+    body: Body,
+    next: () => Intent,
+    dt: number,
+    manual?: Intent,
+    fleeing = false,
+  ): Intent {
     if (!body.support) {
       this.turnProgress = 1;
       this.pending = undefined;
@@ -33,6 +39,7 @@ export class BipedMovement {
         ((this.facing === 1 ? 0 : 1) - this.heading) * Math.min(1, dt * 6);
       return command;
     }
+    if (fleeing) this.landingTime = Infinity;
     if (this.landingTime < this.landSeconds) {
       this.landingTime += dt;
       return planted;
@@ -40,7 +47,7 @@ export class BipedMovement {
     if (this.turnProgress < 1) {
       this.turnProgress = Math.min(
         1,
-        this.turnProgress + dt / this.turnSeconds,
+        this.turnProgress + dt / (fleeing ? 0.24 : this.turnSeconds),
       );
       const t = this.turnProgress;
       const ease = t * t * (3 - 2 * t);

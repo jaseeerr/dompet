@@ -12,6 +12,6 @@ export declare class BipedMovement {
     private pending?;
     constructor(turnSeconds: number, landSeconds: number);
     invalidate(): void;
-    intent(body: Body, next: () => Intent, dt: number, manual?: Intent): Intent;
+    intent(body: Body, next: () => Intent, dt: number, manual?: Intent, fleeing?: boolean): Intent;
     landed(): void;
 }

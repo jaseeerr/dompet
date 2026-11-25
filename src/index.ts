@@ -11,6 +11,7 @@ import {
   stepSeconds,
   step,
   spawn,
+  supports,
   type Intent,
 } from "./physics/motion.js";
 import {
@@ -294,6 +295,37 @@ export class DOMPet {
     let biped = newBiped();
     let web: { platformId: string; origin: Body; elapsed: number } | undefined;
     let nextWebTime = 1200;
+    let pointer: { x: number; y: number } | undefined;
+    let fleeing = false;
+    const fleeIntent = (): Intent => {
+      const direction =
+        pointer && pointer.x !== body.x
+          ? pointer.x < body.x
+            ? 1
+            : -1
+          : animation.facing;
+      const support = world.platforms.find((p) => p.id === body.support);
+      const nextX = body.x + direction * settings.speed * 1.65 * stepSeconds;
+      const canEscape = support && supports(support, nextX, width, settings);
+      return { direction: canEscape ? direction : 0, jump: false };
+    };
+    const updateFleeing = () => {
+      const radius = Math.max(42, size * (fleeing ? 1.45 : 1.05));
+      const top = body.y - settings.height;
+      const next = Boolean(
+        pointer &&
+        !this.#manual &&
+        body.support &&
+        Math.hypot(
+          Math.max(0, Math.abs(pointer.x - body.x) - settings.width / 2),
+          Math.max(0, top - pointer.y, pointer.y - body.y),
+        ) <= radius,
+      );
+      if (next !== fleeing) {
+        fleeing = next;
+        this.#replan?.();
+      }
+    };
     const webTarget = (platform: Platform | undefined, origin: Body) => {
       if (!platform?.source?.isConnected || platform.y < size) return;
       const anchor = webAnchor(platform, origin, settings.width);
@@ -320,6 +352,7 @@ export class DOMPet {
       animation.web = undefined;
       if (
         !web &&
+        !fleeing &&
         !this.#manual &&
         this.#character === "spiderman" &&
         body.support &&
@@ -339,6 +372,7 @@ export class DOMPet {
           }
         }
       }
+      if (fleeing && body.support) web = undefined;
       if (!web) return false;
       const anchor = this.#manual
         ? undefined
@@ -608,6 +642,27 @@ export class DOMPet {
     }
     this.#controller = new AbortController();
     const signal = this.#controller.signal;
+    const clearPointer = () => {
+      pointer = undefined;
+    };
+    window.addEventListener(
+      "pointermove",
+      (event) => {
+        if (event.pointerType === "mouse")
+          pointer = { x: event.clientX, y: event.clientY };
+      },
+      { capture: true, passive: true, signal },
+    );
+    window.addEventListener(
+      "pointerout",
+      (event) => {
+        if (event.pointerType === "mouse" && !event.relatedTarget)
+          clearPointer();
+      },
+      { capture: true, passive: true, signal },
+    );
+    window.addEventListener("blur", clearPointer, { signal });
+    document.addEventListener("visibilitychange", clearPointer, { signal });
     const suspend = () => {
       this.#suspended = true;
       this.#sync();
@@ -689,20 +744,20 @@ export class DOMPet {
       draw,
       () => {
         const start = metrics ? performance.now() : 0;
+        updateFleeing();
         const plans = explorer.plans;
-        const nextIntent = () =>
-          this.#manual ? this.#intent : explorer.intent(body);
+        const override = this.#manual
+          ? this.#intent
+          : fleeing
+            ? fleeIntent()
+            : undefined;
+        const nextIntent = () => override ?? explorer.intent(body);
         const grounded = body.support !== null;
         const traversing = advanceWeb();
         const intent = traversing
           ? undefined
           : biped
-            ? biped.intent(
-                body,
-                nextIntent,
-                stepSeconds,
-                this.#manual ? this.#intent : undefined,
-              )
+            ? biped.intent(body, nextIntent, stepSeconds, override, fleeing)
             : nextIntent();
         const physicsStart = metrics ? performance.now() : 0;
         if (metrics) {
@@ -711,7 +766,13 @@ export class DOMPet {
           metrics.graphEdges = graph.edgeCount;
         }
         if (intent)
-          body = step(body, intent, world.platforms, bounds(), this.#motion);
+          body = step(
+            body,
+            intent,
+            world.platforms,
+            bounds(),
+            fleeing ? { ...settings, speed: settings.speed * 1.65 } : settings,
+          );
         animation.update(
           body,
           grounded,
