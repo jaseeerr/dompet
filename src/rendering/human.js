@@ -67,6 +67,8 @@ export function humanAnimator(root, clips) {
       let name = "Idle",
         time = now % actions.Idle.getClip().duration;
       group.rotation.y = (1 - 2 * animation.heading) * 0.92;
+      group.rotation.z =
+        animation.web?.clip === "WebPull" ? -(animation.web.lean ?? 0) : 0;
       if (!grounded) {
         name =
           animation.clip === "jump" && animation.elapsed < 160

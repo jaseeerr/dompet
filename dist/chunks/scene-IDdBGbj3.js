@@ -25141,7 +25141,7 @@ function lC(i, A) {
       T = f;
       const M = m.turnProgress < 1, p = m.landingTime ?? f - C;
       let x = "Idle", F = f % v.Idle.getClip().duration;
-      u.rotation.y = (1 - 2 * m.heading) * 0.92, b ? m.anticipation > 0.2 ? (x = "JumpTakeoff", F = (B - 0.16) * m.anticipation) : p < v.Land.getClip().duration ? (x = "Land", F = p) : M ? (x = "Turn", F = m.turnProgress * v.Turn.getClip().duration) : l.vx && (x = "Walk", F = m.distance * gg / (h * 0.82) % 1) : (x = m.clip === "jump" && m.elapsed < 160 ? "JumpTakeoff" : "Airborne", F = x === "JumpTakeoff" ? B - 0.16 + m.elapsed / 1e3 : 0), m.web && v[m.web.clip] && (x = m.web.clip, F = m.web.time);
+      u.rotation.y = (1 - 2 * m.heading) * 0.92, u.rotation.z = m.web?.clip === "WebPull" ? -(m.web.lean ?? 0) : 0, b ? m.anticipation > 0.2 ? (x = "JumpTakeoff", F = (B - 0.16) * m.anticipation) : p < v.Land.getClip().duration ? (x = "Land", F = p) : M ? (x = "Turn", F = m.turnProgress * v.Turn.getClip().duration) : l.vx && (x = "Walk", F = m.distance * gg / (h * 0.82) % 1) : (x = m.clip === "jump" && m.elapsed < 160 ? "JumpTakeoff" : "Airborne", F = x === "JumpTakeoff" ? B - 0.16 + m.elapsed / 1e3 : 0), m.web && v[m.web.clip] && (x = m.web.clip, F = m.web.time);
       const G = v[x];
       c !== G && (o?.stop(), o = c, I = f - Math.max(0, j), G.play(), c = G);
       const V = o ? Math.min(1, Math.max(0, (f - I) / 0.09)) : 1;

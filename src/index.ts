@@ -15,6 +15,9 @@ import {
 } from "./physics/motion.js";
 import {
   webAnchor,
+  webFlightTime,
+  webStrand,
+  webSwing,
   webPullDuration,
   webRelease,
   webShootDuration,
@@ -297,7 +300,7 @@ export class DOMPet {
       if (
         !anchor ||
         origin.y - anchor.y < size * 0.45 ||
-        anchor.distance > Math.hypot(width, height) * 0.65
+        anchor.distance > Math.hypot(width, height) * 0.92
       )
         return;
       const half = settings.width / 2;
@@ -307,7 +310,7 @@ export class DOMPet {
             Math.min(origin.x, anchor.x) - half < zone.right &&
             Math.max(origin.x, anchor.x) + half > zone.left &&
             anchor.y - size < zone.bottom &&
-            origin.y > zone.top,
+            Math.min(height, origin.y + size * 0.3) > zone.top,
         )
       )
         return;
@@ -325,11 +328,13 @@ export class DOMPet {
         animation.clock >= nextWebTime
       ) {
         nextWebTime = animation.clock + 5000;
-        let nearest = Infinity;
+        let reach = 0;
         for (const platform of world.platforms) {
           const anchor = webTarget(platform, body);
-          if (anchor && anchor.distance < nearest) {
-            nearest = anchor.distance;
+          if (!anchor) continue;
+          const score = Math.abs(anchor.x - body.x) + anchor.distance * 0.45;
+          if (score > reach) {
+            reach = score;
             web = { platformId: platform.id, origin: body, elapsed: 0 };
           }
         }
@@ -341,32 +346,49 @@ export class DOMPet {
             world.platforms.find((p) => p.id === web?.platformId),
             web.origin,
           );
-      if (!anchor || (body.support && body.support !== web.origin.support)) {
+      if (
+        !anchor ||
+        (body.support && body.support !== web.origin.support) ||
+        (body.support && body.y !== web.origin.y)
+      ) {
         web = undefined;
         return false;
       }
-      const { elapsed, origin, platformId } = web;
+      const { origin, platformId } = web;
       web.elapsed += stepSeconds;
-      const shooting = elapsed < webShootDuration;
-      const pullTime = elapsed - webShootDuration;
-      animation.web = shooting
-        ? { clip: "WebShoot", time: elapsed }
-        : { clip: "WebPull", time: pullTime % webPullDuration };
-      if (shooting) return true;
-      const duration = Math.max(0.38, Math.min(0.95, anchor.distance / 650));
-      const progress = Math.min(1, pullTime / duration);
-      const eased = progress * progress * (3 - 2 * progress);
+      const pullTime =
+        web.elapsed - webRelease - webFlightTime(anchor.distance);
+      if (pullTime <= 0) {
+        animation.web = {
+          clip: "WebShoot",
+          time: Math.min(web.elapsed, webShootDuration - 0.001),
+        };
+        return true;
+      }
+      const floor = Math.min(height, origin.y + size * 0.3);
+      const { x, y, arrived } = webSwing(
+        origin,
+        anchor,
+        pullTime,
+        settings.gravity,
+        floor,
+      );
       body = {
-        x: origin.x + (anchor.x - origin.x) * eased,
-        y: origin.y + (anchor.y - origin.y) * eased,
-        vx: 0,
-        vy: 0,
-        support: progress === 1 ? platformId : null,
+        x,
+        y,
+        vx: arrived ? 0 : (x - body.x) / stepSeconds,
+        vy: arrived ? 0 : (y - body.y) / stepSeconds,
+        support: arrived ? platformId : null,
       };
-      if (progress === 1) {
+      if (arrived) {
         web = undefined;
-        animation.web = undefined;
         this.#replan?.();
+      } else {
+        animation.web = {
+          clip: "WebPull",
+          time: pullTime % webPullDuration,
+          lean: Math.max(-0.23, Math.min(0.23, body.vx / 2500)),
+        };
       }
       return true;
     };
@@ -496,7 +518,17 @@ export class DOMPet {
       );
       if (!model && visible) {
         sprite.draw(ctx, animation, body, size, ratio);
-        dirty = [left - 2, top - 2, size + 4, size + 4];
+        const padding =
+          2 +
+          (animation.web?.clip === "WebPull"
+            ? Math.ceil(size * Math.abs(animation.web.lean ?? 0))
+            : 0);
+        dirty = [
+          left - padding,
+          top - padding,
+          size + 2 * padding,
+          size + 2 * padding,
+        ];
       }
       if (visible && web && animation.web && web.elapsed >= webRelease) {
         const anchor = webTarget(
@@ -508,19 +540,27 @@ export class DOMPet {
             x: body.x + animation.facing * size * 0.16,
             y: body.y - size * 0.73,
           };
-          const extension = Math.min(1, (web.elapsed - webRelease) / 0.12);
-          const x = hand.x + (anchor.x - hand.x) * extension;
-          const y = hand.y + (anchor.y - hand.y) * extension;
+          const flightTime = webFlightTime(anchor.distance);
+          const sinceRelease = web.elapsed - webRelease;
+          const extension = Math.min(1, sinceRelease / flightTime);
+          const { x, y, controlX, controlY } = webStrand(
+            hand,
+            anchor,
+            extension,
+            Math.max(0, sinceRelease - flightTime),
+          );
+          const left = Math.min(hand.x, x, controlX);
+          const top = Math.min(hand.y, y, controlY);
           webDirty = [
-            Math.min(hand.x, x) - 3,
-            Math.min(hand.y, y) - 3,
-            Math.abs(x - hand.x) + 6,
-            Math.abs(y - hand.y) + 6,
+            left - 3,
+            top - 3,
+            Math.max(hand.x, x, controlX) - left + 6,
+            Math.max(hand.y, y, controlY) - top + 6,
           ];
           ctx.save();
           ctx.beginPath();
           ctx.moveTo(hand.x, hand.y);
-          ctx.lineTo(x, y);
+          ctx.quadraticCurveTo(controlX, controlY, x, y);
           ctx.lineCap = "round";
           ctx.lineWidth = 2.5;
           ctx.strokeStyle = "rgba(50, 58, 70, 0.6)";
@@ -695,6 +735,11 @@ export class DOMPet {
           if (anchor && anchor.x !== web.origin.x) {
             animation.facing = anchor.x < web.origin.x ? -1 : 1;
             animation.heading = animation.facing === 1 ? 0 : 1;
+            if (biped) {
+              biped.facing = animation.facing;
+              biped.heading = animation.heading;
+              biped.turnProgress = 1;
+            }
           }
         }
         if (intent?.jump) this.#intent.jump = false;

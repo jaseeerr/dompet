@@ -154,6 +154,8 @@ export function loadCat(
         }
         frame = Math.min(23, Math.floor(phase * 24));
       }
+      if (animation.web?.clip === "WebPull")
+        ctx.rotate(animation.web.lean ?? 0);
       ctx.scale(facing * scale, scale);
       ctx.imageSmoothingEnabled = textured || human;
       if (ready) {
