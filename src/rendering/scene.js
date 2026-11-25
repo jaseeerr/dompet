@@ -75,7 +75,9 @@ export async function scene(host, lost, signal, character) {
     disposeAsset();
     throw new Error("Disposed");
   }
-  const avatar = human ? humanAnimator(root, animations) : catAnimator(root);
+  const avatar = human
+    ? humanAnimator(root, animations, character === "spiderman")
+    : catAnimator(root);
   const marker = new T.Vector3();
   const webHand =
     character === "spiderman" ? root.getObjectByName("HandR") : null;

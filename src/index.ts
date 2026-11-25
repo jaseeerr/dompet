@@ -515,7 +515,7 @@ export class DOMPet {
           left < r.right &&
           left + size > r.left &&
           top < r.bottom &&
-          body.y > r.top,
+          body.y + size * 0.32 * animation.sit > r.top,
       );
       if (model && visible) {
         const support = world.platforms
@@ -561,7 +561,7 @@ export class DOMPet {
           left - padding,
           top - padding,
           size + 2 * padding,
-          size + 2 * padding,
+          size + 2 * padding + (animation.sit >= 0.5 ? size * 0.31 : 0),
         ];
       }
       if (visible && web && animation.web && web.elapsed >= webRelease) {
@@ -787,6 +787,24 @@ export class DOMPet {
           animation.turnProgress = biped.turnProgress;
           animation.landingTime = biped.landingTime;
         }
+        const resting =
+          this.#character === "spiderman" &&
+          !this.#manual &&
+          !fleeing &&
+          !traversing &&
+          body.support &&
+          body.support !== "floor" &&
+          !body.vx &&
+          !intent?.jump &&
+          (explorer.state === "idle" || explorer.state === "sleep") &&
+          animation.turnProgress === 1 &&
+          animation.landingTime >= 0.65;
+        if (!body.support || traversing) animation.sit = 0;
+        else
+          animation.sit = Math.max(
+            0,
+            Math.min(1, animation.sit + stepSeconds * (resting ? 4 : -8)),
+          );
         if (metrics) physicsMs += performance.now() - physicsStart;
         if (animation.web && web) {
           const anchor = webTarget(

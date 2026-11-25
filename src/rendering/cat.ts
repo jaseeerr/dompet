@@ -13,7 +13,10 @@ import {
   type WebPose,
 } from "../physics/web.js";
 
+export const seatedSpriteAnchor = 17;
+
 export class Animation {
+  sit = 0;
   web?: WebPose;
   clip: Clip = "fall";
   facing: 1 | -1 = tabby.facing;
@@ -93,7 +96,7 @@ export function loadCat(
   image.onload = () => {
     ready =
       image.naturalWidth === (spider ? 24 : 15) * tabby.width * frameScale &&
-      image.naturalHeight === (spider ? 9 : 1) * tabby.height * frameScale;
+      image.naturalHeight === (spider ? 10 : 1) * tabby.height * frameScale;
     redraw();
     if (!ready) failed();
   };
@@ -122,6 +125,7 @@ export function loadCat(
         Math.round(body.x * dpr) / dpr,
         Math.round(body.y * dpr) / dpr,
       );
+      let anchorY = tabby.anchorY as number;
       let frame = animation.frame,
         row = 0,
         facing = animation.facing;
@@ -135,6 +139,10 @@ export function loadCat(
         } else if (!body.support) {
           row = 4;
           phase = Math.max(0, Math.min(1, (body.vy + 480) / 960));
+        } else if (animation.sit >= 0.5) {
+          row = 9;
+          facing = 1;
+          anchorY = seatedSpriteAnchor;
         } else if (animation.landingTime < 1.02) {
           row = 5;
           phase = animation.landingTime / 1.02;
@@ -166,7 +174,7 @@ export function loadCat(
           tabby.width * frameScale,
           tabby.height * frameScale,
           -tabby.anchorX,
-          -tabby.anchorY,
+          -anchorY,
           tabby.width,
           tabby.height,
         );

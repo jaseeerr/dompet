@@ -1,6 +1,7 @@
-// Run in the journal's Vite module environment. Each frame has the same ground anchor.
+// Run in the journal's Vite module environment.
 import * as T from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { seatedSpriteAnchor } from "../src/rendering/cat.ts";
 import { humanAnimator, humanHeight } from "../src/rendering/human.js";
 import url from "../src/characters/tabby.glb?url";
 import humanUrl from "../downloaded assets/dompet-human.glb?url";
@@ -32,16 +33,22 @@ export async function renderFallback(human = false) {
   const ctx = canvas.getContext("2d"),
     mixer = new T.AnimationMixer(cat);
   if (human === "spiderman") {
-    // Rows: idle, walk, turn, takeoff, flight, land, blink, web shoot, web pull.
+    // Rows: idle, walk, turn, takeoff, flight, land, blink, web shoot, web pull, seated.
     const cols = 24;
     canvas.width = cols * 192;
-    canvas.height = 9 * 144;
+    canvas.height = 10 * 144;
     const group = new T.Group();
     group.add(cat);
     cat.rotation.y = 0;
     stage.add(group);
-    for (let row = 0; row < 9; row++) {
-      const animator = humanAnimator(cat, animations);
+    for (let row = 0; row < 10; row++) {
+      const animator = humanAnimator(cat, animations, true);
+      if (row === 9) {
+        const shift = ((23 - seatedSpriteAnchor) * humanHeight) / 23;
+        camera.top -= shift;
+        camera.bottom -= shift;
+        camera.updateProjectionMatrix();
+      }
       for (let col = 0; col < cols; col++) {
         const cycle = col / cols,
           t = col / (cols - 1);
@@ -56,6 +63,7 @@ export async function renderFallback(human = false) {
           clip: row === 4 ? "fall" : "idle",
           anticipation: row === 3 ? t : 0,
           elapsed: 0,
+          sit: row === 9 ? 1 : 0,
           web:
             row === 7
               ? { clip: "WebShoot", time: t * 0.4 }

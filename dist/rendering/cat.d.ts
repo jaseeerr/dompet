@@ -3,7 +3,9 @@ import { type Clip } from "../characters/tabby.js";
 import type { Body } from "../physics/motion.js";
 import type { Behaviour } from "../behaviour/explorer.js";
 import { type WebPose } from "../physics/web.js";
+export declare const seatedSpriteAnchor = 17;
 export declare class Animation {
+    sit: number;
     web?: WebPose;
     clip: Clip;
     facing: 1 | -1;

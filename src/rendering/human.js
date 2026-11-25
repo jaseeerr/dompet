@@ -1,8 +1,10 @@
 import { AnimationMixer, Quaternion, Vector3 } from "three";
+import { seatedPose } from "./seated.js";
 
 // Metres from the embedded rest bounds and the artist's walkCycleMeters metadata.
 export const humanHeight = 2.15767;
-export function humanAnimator(root, clips) {
+export function humanAnimator(root, clips, canSit = false) {
+  const seat = canSit ? seatedPose(root) : undefined;
   const mixer = new AnimationMixer(root);
   // The group's yaw drives facing. Remove only the authored pelvis yaw from
   // Turn, preserving the lateral step, weight shift and spine counterrotation.
@@ -48,6 +50,7 @@ export function humanAnimator(root, clips) {
     draw(group, body, animation, size) {
       const now = animation.clock / 1000,
         grounded = body.support !== null;
+      seat?.restore();
       if (applied)
         for (const part of flightBones) part.bone.quaternion.copy(part.base);
       if (now < lastClock) {
@@ -66,7 +69,9 @@ export function humanAnimator(root, clips) {
       const contactTime = animation.landingTime ?? now - landed;
       let name = "Idle",
         time = now % actions.Idle.getClip().duration;
-      group.rotation.y = (1 - 2 * animation.heading) * 0.92;
+      const sitting =
+        seat && grounded && !animation.web ? (animation.sit ?? 0) : 0;
+      group.rotation.y = (1 - 2 * animation.heading) * 0.92 * (1 - sitting);
       group.rotation.z =
         animation.web?.clip === "WebPull" ? -(animation.web.lean ?? 0) : 0;
       if (!grounded) {
@@ -95,6 +100,10 @@ export function humanAnimator(root, clips) {
       if (animation.web && actions[animation.web.clip]) {
         name = animation.web.clip;
         time = animation.web.time;
+      }
+      if (sitting > 0.1 && !body.vx && animation.anticipation <= 0.2) {
+        name = "Idle";
+        time = now % actions.Idle.getClip().duration;
       }
       const action = actions[name];
       if (previous !== action) {
@@ -132,8 +141,10 @@ export function humanAnimator(root, clips) {
         );
       }
       applied = true;
+      seat?.apply(group, sitting);
     },
     dispose() {
+      seat?.restore();
       mixer.stopAllAction();
       mixer.uncacheRoot(root);
     },
