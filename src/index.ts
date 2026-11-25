@@ -1,3 +1,4 @@
+import { BipedMovement, walkSpeed } from "./physics/biped.js";
 import type { Behaviour, Body, ScanOptions } from "./types.js";
 import { observeLayout, modalOpen } from "./dom/layout.js";
 import { carry, sameGeometry } from "./world/reconcile.js";
@@ -273,6 +274,15 @@ export class DOMPet {
     let graph: Graph;
     let explorer: Explorer;
     const human = this.#character !== "cat";
+    const originalSpeed = settings.speed;
+    const newBiped = () =>
+      human
+        ? new BipedMovement(
+            this.#character === "spiderman" ? 1.75 : 1.8,
+            this.#character === "spiderman" ? 1.02 : 0.52,
+          )
+        : undefined;
+    let biped = newBiped();
     const sprite = loadCat(
       draw,
       () =>
@@ -323,6 +333,7 @@ export class DOMPet {
       sprite.dispose();
     };
     this.#replan = () => {
+      biped?.invalidate();
       graph = new Graph(world.platforms, bounds(), this.#motion);
       explorer = new Explorer(graph);
       if (metrics) {
@@ -338,6 +349,7 @@ export class DOMPet {
       this.#intent = { direction: 0, jump: false };
       body = spawn(bounds(), settings);
       animation = new Animation();
+      biped = newBiped();
       draw();
     };
     let dirty: [number, number, number, number] | undefined;
@@ -416,6 +428,10 @@ export class DOMPet {
       height = host.clientHeight;
       ratio = window.devicePixelRatio || 1;
       size = Math.min(width, height, override ?? (width <= 600 ? 88 : 112));
+      if (human) {
+        settings.speed = walkSpeed(size, originalSpeed / motion.speed);
+        settings.airSpeed = originalSpeed;
+      }
       settings.fullFootprint = true;
       settings.width = size * (human ? 0.26 : 0.43);
       settings.height = size * (human ? 1 : 0.56);
@@ -511,7 +527,16 @@ export class DOMPet {
       () => {
         const start = metrics ? performance.now() : 0;
         const plans = explorer.plans;
-        const intent = this.#manual ? this.#intent : explorer.intent(body);
+        const nextIntent = () =>
+          this.#manual ? this.#intent : explorer.intent(body);
+        const intent = biped
+          ? biped.intent(
+              body,
+              nextIntent,
+              stepSeconds,
+              this.#manual ? this.#intent : undefined,
+            )
+          : nextIntent();
         const physicsStart = metrics ? performance.now() : 0;
         if (metrics) {
           navigationMs += physicsStart - start;
@@ -527,8 +552,15 @@ export class DOMPet {
           stepSeconds * 1000,
           this.#manual ? 0 : explorer.lookPitch(body),
         );
+        if (biped) {
+          if (!grounded && body.support) biped.landed();
+          animation.facing = biped.facing;
+          animation.heading = biped.heading;
+          animation.turnProgress = biped.turnProgress;
+          animation.landingTime = biped.landingTime;
+        }
         if (metrics) physicsMs += performance.now() - physicsStart;
-        this.#intent.jump = false;
+        if (intent.jump) this.#intent.jump = false;
         if (!grounded && body.support)
           this.#emit("landing", {
             platformId: body.support,

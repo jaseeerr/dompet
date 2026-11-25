@@ -9,6 +9,8 @@ export declare class Animation {
     distance: number;
     clock: number;
     heading: number;
+    turnProgress: number;
+    landingTime: number;
     sleep: number;
     anticipation: number;
     impact: number;

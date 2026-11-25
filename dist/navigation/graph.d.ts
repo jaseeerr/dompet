@@ -21,6 +21,7 @@ export declare class Graph {
         fullFootprint: boolean;
         height: number;
         speed: number;
+        airSpeed: number;
         gravity: number;
         jumpSpeed: number;
         terminalSpeed: number;
@@ -36,6 +37,7 @@ export declare class Graph {
         fullFootprint: boolean;
         height: number;
         speed: number;
+        airSpeed: number;
         gravity: number;
         jumpSpeed: number;
         terminalSpeed: number;

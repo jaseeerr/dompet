@@ -7,6 +7,7 @@ export declare const motion: {
     fullFootprint: boolean;
     height: number;
     speed: number;
+    airSpeed: number;
     gravity: number;
     jumpSpeed: number;
     terminalSpeed: number;
@@ -24,6 +25,7 @@ export declare function spawn(bounds: Bounds, settings?: {
     fullFootprint: boolean;
     height: number;
     speed: number;
+    airSpeed: number;
     gravity: number;
     jumpSpeed: number;
     terminalSpeed: number;
@@ -33,6 +35,7 @@ export declare function supports(platform: Platform, x: number, width: number, s
     fullFootprint: boolean;
     height: number;
     speed: number;
+    airSpeed: number;
     gravity: number;
     jumpSpeed: number;
     terminalSpeed: number;
@@ -42,6 +45,7 @@ export declare function step(body: Body, intent: Intent, platforms: Platform[], 
     fullFootprint: boolean;
     height: number;
     speed: number;
+    airSpeed: number;
     gravity: number;
     jumpSpeed: number;
     terminalSpeed: number;

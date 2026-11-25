@@ -8,6 +8,7 @@ export const motion = {
   fullFootprint: false,
   height: 22,
   speed: 180,
+  airSpeed: 0,
   gravity: 1200,
   jumpSpeed: 480,
   terminalSpeed: 800,
@@ -73,11 +74,15 @@ export function step(
   )
     return spawn(bounds, settings);
   const half = Math.min(width, settings.width) / 2;
-  const targetX = body.x + intent.direction * settings.speed * stepSeconds;
+  const speed =
+    (intent.jump || !body.support) && settings.airSpeed
+      ? settings.airSpeed
+      : settings.speed;
+  const targetX = body.x + intent.direction * speed * stepSeconds;
   const clampX = (value: number) =>
     Math.max(half, Math.min(width - half, value));
   const x = clampX(targetX);
-  const vx = x === targetX ? intent.direction * settings.speed : 0;
+  const vx = x === targetX ? intent.direction * speed : 0;
   const standing = platforms.find(
     (p) =>
       p.id === body.support &&

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0-rc.5
+
+Humanoid walking speed follows standing height and the authored stride. Reversals and landings hold ground position for the full clip. Airborne limbs respond to vertical velocity. Spider-Man’s 2D renderer now includes 24 walk frames, a stepping turn and landing recovery.
+
 ## 1.0.0-rc.4
 
 Spider-Man is the default character with animated mask lenses, seven authored clips, short blends between body poses and a matching 2D fallback. Explicit human and cat selections remain available.

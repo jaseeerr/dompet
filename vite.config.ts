@@ -7,6 +7,16 @@ export default defineConfig({
       generateBundle() {
         this.emitFile({
           type: "asset",
+          fileName: "assets/spiderman-fallback.webp",
+          source: readFileSync(
+            new URL(
+              "./src/characters/spiderman-fallback.webp",
+              import.meta.url,
+            ),
+          ),
+        });
+        this.emitFile({
+          type: "asset",
           fileName: "assets/dompet-spiderman.glb",
           source: readFileSync(
             new URL(

@@ -5,6 +5,7 @@ export declare function carry(body: Body, old: Platform[], next: Platform[], bou
     fullFootprint: boolean;
     height: number;
     speed: number;
+    airSpeed: number;
     gravity: number;
     jumpSpeed: number;
     terminalSpeed: number;

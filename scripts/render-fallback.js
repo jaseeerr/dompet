@@ -1,6 +1,7 @@
 // Run in the journal's Vite module environment. Each frame has the same ground anchor.
 import * as T from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { humanAnimator, humanHeight } from "../src/rendering/human.js";
 import url from "../src/characters/tabby.glb?url";
 import humanUrl from "../downloaded assets/dompet-human.glb?url";
 import spiderUrl from "../downloaded assets/spiderman/dompet-spiderman.glb?url";
@@ -30,6 +31,50 @@ export async function renderFallback(human = false) {
   canvas.height = 144;
   const ctx = canvas.getContext("2d"),
     mixer = new T.AnimationMixer(cat);
+  if (human === "spiderman") {
+    // Rows: idle, walk, right-to-left turn, takeoff, flight, land, blink.
+    const cols = 24;
+    canvas.width = cols * 192;
+    canvas.height = 7 * 144;
+    const group = new T.Group();
+    group.add(cat);
+    cat.rotation.y = 0;
+    stage.add(group);
+    for (let row = 0; row < 7; row++) {
+      const animator = humanAnimator(cat, animations);
+      for (let col = 0; col < cols; col++) {
+        const cycle = col / cols,
+          t = col / (cols - 1);
+        const phase = row === 2 ? t : 0;
+        const state = {
+          clock: row === 6 ? t * 240 : 1000 + cycle * 3600,
+          heading: phase * phase * (3 - 2 * phase),
+          facing: row === 2 ? -1 : 1,
+          turnProgress: row === 2 ? t : 1,
+          landingTime: row === 5 ? t * 1.02 : Infinity,
+          distance: (cycle * 0.82 * 112) / humanHeight,
+          clip: row === 4 ? "fall" : "idle",
+          anticipation: row === 3 ? t : 0,
+          elapsed: 0,
+        };
+        animator.draw(
+          group,
+          {
+            support: row === 4 ? null : "floor",
+            vx: row === 1 ? 42 : 0,
+            vy: row === 4 ? -480 + 960 * t : 0,
+          },
+          state,
+          112,
+        );
+        renderer.render(stage, camera);
+        ctx.drawImage(renderer.domElement, col * 192, row * 144);
+      }
+      animator.dispose();
+    }
+    renderer.dispose();
+    return canvas.toDataURL("image/webp", 0.88).split(",")[1];
+  }
   let frame = 0;
   for (const [name, times] of human
     ? [

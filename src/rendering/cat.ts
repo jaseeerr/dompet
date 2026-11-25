@@ -1,4 +1,4 @@
-import spiderSheet from "../characters/spiderman-fallback.webp?inline";
+import spiderSheet from "../characters/spiderman-fallback.webp?url";
 import type { DOMPetOptions } from "../index.js";
 import humanSheet from "../characters/human-fallback.webp?inline";
 import texturedSheet from "../characters/tabby-fallback.webp?inline";
@@ -14,6 +14,8 @@ export class Animation {
   distance = 0;
   clock = 0;
   heading = 0;
+  turnProgress = 1;
+  landingTime = Infinity;
   sleep = 0;
   anticipation = 0;
   impact = 0;
@@ -78,12 +80,13 @@ export function loadCat(
 ) {
   const human = character !== "cat";
   const frameScale = textured || human ? 6 : 1;
+  const spider = character === "spiderman";
   const image = new Image();
   let ready = false;
   image.onload = () => {
     ready =
-      image.naturalWidth === 15 * tabby.width * frameScale &&
-      image.naturalHeight === tabby.height * frameScale;
+      image.naturalWidth === (spider ? 24 : 15) * tabby.width * frameScale &&
+      image.naturalHeight === (spider ? 7 : 1) * tabby.height * frameScale;
     redraw();
     if (!ready) failed();
   };
@@ -92,14 +95,15 @@ export function loadCat(
     redraw();
     failed();
   };
-  image.src =
-    character === "spiderman"
-      ? spiderSheet
-      : human
-        ? humanSheet
-        : textured
-          ? texturedSheet
-          : sheet;
+  if (spider) {
+    // A synchronous start/destroy pair should never begin an asset fetch.
+    queueMicrotask(() => {
+      if (image.onload)
+        image.src = import.meta.env.DEV
+          ? spiderSheet
+          : new URL("./assets/spiderman-fallback.webp", import.meta.url).href;
+    });
+  } else image.src = human ? humanSheet : textured ? texturedSheet : sheet;
   return {
     draw(
       ctx: CanvasRenderingContext2D,
@@ -114,13 +118,40 @@ export function loadCat(
         Math.round(body.x * dpr) / dpr,
         Math.round(body.y * dpr) / dpr,
       );
-      ctx.scale(animation.facing * scale, scale);
+      let frame = animation.frame,
+        row = 0,
+        facing = animation.facing;
+      if (spider) {
+        let phase = (animation.clock / 3600) % 1;
+        if (!body.support) {
+          row = 4;
+          phase = Math.max(0, Math.min(1, (body.vy + 480) / 960));
+        } else if (animation.landingTime < 1.02) {
+          row = 5;
+          phase = animation.landingTime / 1.02;
+        } else if (animation.turnProgress < 1) {
+          row = 2;
+          phase = animation.turnProgress;
+          facing = animation.facing === -1 ? 1 : -1;
+        } else if (animation.anticipation > 0.2) {
+          row = 3;
+          phase = animation.anticipation;
+        } else if (body.vx) {
+          row = 1;
+          phase = ((animation.distance * 2.15767) / (size * 0.82)) % 1;
+        } else if (animation.clock % 3700 < 240) {
+          row = 6;
+          phase = (animation.clock % 3700) / 240;
+        }
+        frame = Math.min(23, Math.floor(phase * 24));
+      }
+      ctx.scale(facing * scale, scale);
       ctx.imageSmoothingEnabled = textured || human;
       if (ready) {
         ctx.drawImage(
           image,
-          animation.frame * tabby.width * frameScale,
-          0,
+          frame * tabby.width * frameScale,
+          row * tabby.height * frameScale,
           tabby.width * frameScale,
           tabby.height * frameScale,
           -tabby.anchorX,

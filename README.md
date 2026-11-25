@@ -6,10 +6,10 @@ A framework-independent browser pet. Spider-Man walks, turns and jumps on visibl
 With read access to `jaseeerr/dompet` and GitHub SSH authentication configured, install the V1 candidate from your application directory:
 
 ```sh
-npm install 'git+ssh://git@github.com/jaseeerr/dompet.git#v1.0.0-rc.4'
+npm install 'git+ssh://git@github.com/jaseeerr/dompet.git#v1.0.0-rc.5'
 ```
 
-For an immutable pin, replace `v1.0.0-rc.4` with the full commit SHA returned by `git ls-remote git@github.com:jaseeerr/dompet.git refs/tags/v1.0.0-rc.4`. Commit your application's lockfile and use `npm ci` in subsequent builds. The repository tracks the compiled ESM library, declarations and self-hosted character assets. Installing with `--ignore-scripts` is supported.
+For an immutable pin, replace `v1.0.0-rc.5` with the full commit SHA returned by `git ls-remote git@github.com:jaseeerr/dompet.git refs/tags/v1.0.0-rc.5`. Commit your application's lockfile and use `npm ci` in subsequent builds. The repository tracks the compiled ESM library, declarations and self-hosted character assets. Installing with `--ignore-scripts` is supported.
 
 For a private CI consumer, grant its deploy key read-only access and load the private key from the CI secret store. Use verified GitHub host keys. An approved read-only machine credential can also authenticate Git through a credential helper. Keep credentials out of dependency URLs, lockfiles and logs.
 
@@ -53,7 +53,7 @@ All constructor options are optional.
 | `character` | `"spiderman"` | Select `"spiderman"`, `"human"` or `"cat"` |
 | `size` | 112 desktop, 88 at viewport widths up to 600 px | Positive character size in CSS pixels, capped to the viewport |
 | `renderer` | `"auto"` | Prefer WebGL with sprite fallback. Choose `"sprite"` for the selected character’s 2D renderer or `"webgl"` to request 3D with recovery. |
-| `speed` | `1` | Positive horizontal speed multiplier on 180 CSS pixels per second |
+| `speed` | `1` | Ground and air speed multiplier. At 1, humanoids walk one authored stride per second (about 43 CSS px/s at 112 px tall). Air travel and cat movement use 180 CSS px/s. |
 | `gravity` | `1200` | Positive downward acceleration in CSS pixels per second squared |
 | `include`, `exclude`, `exclusionZones` | Empty arrays | CSS selectors for extra candidates, ignored subtrees and protected rectangles |
 | `minPlatformWidth` | `15` | Minimum usable interval width in CSS pixels |
@@ -102,7 +102,7 @@ A refresh that changes the platform geometry or viewport invalidates the current
 
 ## Cat rendering
 
-DOMPet loads Three.js and the selected GLB on demand. The human’s size is its standing height. Its embedded Idle, Walk, Turn, JumpTakeoff, Airborne and Land clips follow simulation time and distance, with Blink layered independently on the mask lenses or eyelids. Its support footprint is 26% of its height. Choose `character: "cat"` for the tabby, or `{character:"cat",renderer:"sprite",size:32}` for the prototype pixel art.
+DOMPet loads Three.js and the selected GLB on demand. The human’s size is its standing height. Its embedded Idle, Walk, Turn, JumpTakeoff, Airborne and Land clips follow simulation time and distance, with Blink layered independently on the mask lenses or eyelids. Spider-Man plants his feet through the 1.75-second turn and 1.02-second landing. His airborne pose responds to ascent and descent. Its support footprint is 26% of its height. Choose `character: "cat"` for the tabby, or `{character:"cat",renderer:"sprite",size:32}` for the prototype pixel art.
 
 For direct ESM deployment, copy the entire `dist/` directory under your site path and import its `index.js`. Keep `chunks/` and `assets/` beside it. Allow same-origin scripts and model fetches in CSP and permit `data:` images for the embedded fallback. A failed import, model request or WebGL context switches to a 2D rendering of the selected character at the current feet. Inspect `[data-dompet]` and its `data-renderer` attribute for loading, webgl or sprite. Vite consumers can import the package by name. [Art provenance](src/characters/ART.md)
 
